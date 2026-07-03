@@ -4,7 +4,7 @@ import { rain } from '../art/helpers';
 /** 아파트: 창밖 비 + 모니터 글로우 펄스 + 램프 미세 플리커 (640×360) */
 export const fxApartment: Painter = (g, frame, env, mem) => {
   // 창 영역(l69~98%, t12~60% → ×6.4/×3.6)
-  rain(g, mem, 'aptRain', { x: 442, y: 43, w: 186, h: 173, n: 26, alpha: 0.3 });
+  if (!env.reduced) rain(g, mem, 'aptRain', { x: 442, y: 43, w: 186, h: 173, n: 26, alpha: 0.3 });
   if (env.reduced) return;
   // 모니터 글로우 펄스 (듀얼 모니터 중앙 l35~55%)
   const pulse = 0.05 + 0.04 * Math.sin(frame / 24);

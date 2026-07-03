@@ -3,7 +3,7 @@ import { rain, dashRow, prand } from '../art/helpers';
 
 /** 부모님 집: 창밖 비 + TV 화면 애니메이션 (640×360) */
 export const fxParents: Painter = (g, frame, env, mem) => {
-  rain(g, mem, 'parRain', { x: 474, y: 43, w: 128, h: 155, n: 20, alpha: 0.3 });
+  if (!env.reduced) rain(g, mem, 'parRain', { x: 474, y: 43, w: 128, h: 155, n: 20, alpha: 0.3 });
   // TV 화면 (l26~41%, t36~64%) — 뉴스 자막 대시가 주기적으로 바뀐다
   const seed = env.reduced ? 7 : Math.floor(frame / 90);
   g.fillStyle(0x1d3450, 0.9);
