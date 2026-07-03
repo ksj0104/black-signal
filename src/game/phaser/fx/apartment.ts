@@ -1,5 +1,5 @@
-import type { Painter } from '../art/helpers';
-import { rain } from '../art/helpers';
+import type { Painter } from './helpers';
+import { rain } from './helpers';
 
 /** 아파트: 창밖 비 + 모니터 글로우 펄스 + 램프 미세 플리커 (640×360) */
 export const fxApartment: Painter = (g, frame, env, mem) => {

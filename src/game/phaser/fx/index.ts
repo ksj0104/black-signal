@@ -1,5 +1,5 @@
 import type { SceneId } from '../../../content/scenes';
-import type { Painter } from '../art/helpers';
+import type { Painter } from './helpers';
 import { fxApartment } from './apartment';
 import { fxParents } from './parents';
 import { fxSoc } from './soc';

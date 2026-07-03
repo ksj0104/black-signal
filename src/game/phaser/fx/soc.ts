@@ -1,5 +1,5 @@
-import type { Painter } from '../art/helpers';
-import { dashRow } from '../art/helpers';
+import type { Painter } from './helpers';
+import { dashRow } from './helpers';
 
 /** SOC: 상황판 틱커·차트 갱신 + 형광등 미세 플리커 (640×360) */
 export const fxSoc: Painter = (g, frame, env) => {

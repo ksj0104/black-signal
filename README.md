@@ -40,7 +40,7 @@ Playwright는 최초 1회 브라우저 설치가 필요합니다: `npx playwrigh
 | 빌드 | Vite 6 + TypeScript (strict) |
 | UI | React 18 — 가상 OS 데스크톱 (창 관리 uiStore + WindowFrame) |
 | 폰트 | Pretendard(UI) · D2Coding(터미널) · Galmuri11(타이틀) — 전부 로컬 번들, 외부 요청 없음 |
-| 픽셀아트 씬 | Phaser 3 (CANVAS, 320×180, 코드로 그리는 원본 아트) |
+| 픽셀아트 씬 | Phaser 3 (CANVAS, 640×360, 원작 생성 배경 + 코드 이펙트) |
 | 상태 | Zustand (단일 스토어, 화면 라우팅 포함) |
 | 저장 | localStorage (`blacksignal.save.v3`) |
 | 테스트 | Vitest(단위·통합) + Playwright(e2e 스캐폴드) |
@@ -65,7 +65,7 @@ src/
     filesystems/         #   챕터별 허구 증거 파일 트리
     dialogues/  intro.ts #   대화 비트(선택지 → 스탯 효과) · 인트로 슬라이드
   state/gameStore.ts     # Zustand 스토어: 진행/스탯/터미널 버퍼/보드/저장·로드
-  game/                  # Phaser 씬(아파트) + React 호스트
+  game/                  # Phaser 씬 — public/scenes/ 생성 배경 PNG + fx/ 코드 이펙트 레이어, React 호스트
   components/            # 화면·위젯 (터미널, 증거 보드, 사이드바, 대화 오버레이…)
   tests/                 # Vitest — 파이프라인·가드·단서 판정·전체 진행 시뮬레이션
 ```
@@ -118,9 +118,10 @@ src/
   프롤로그 최종 선택이 챕터 1 오프닝 대사를 바꾸고, 이전 챕터 선택이 이후 오프닝·신뢰
   관계에 반영. Ch4 유출 결정 4분기(즉시 공개/검증 후 공개/한정 공유/거부)는 이후 엔딩
   조건의 핵심 입력이다.
-- **데이터 구동 픽셀 씬** — 320×180 픽셀아트(비·네온 플리커·모니터 글로우)를 코드로 렌더.
-  로케이션·핫스팟·캡션·플레이버 대화가 전부 `content/scenes.ts` 데이터이고, 챕터에 따라
-  무대가 바뀐다(아파트 → 부모님 집 → SOC → 승강장). 핫스팟은 접근성 있는 DOM 버튼 오버레이.
+- **데이터 구동 픽셀 씬** — 640×360 생성 배경(`public/scenes/*.png`) 위에 코드 이펙트 레이어
+  (비·네온 플리커·모니터 글로우)를 얹어 렌더. 로케이션·핫스팟·캡션·플레이버 대화가 전부
+  `content/scenes.ts` 데이터이고, 챕터에 따라 무대가 바뀐다(아파트 → 부모님 집 → SOC → 승강장).
+  핫스팟은 접근성 있는 DOM 버튼 오버레이.
 - **미션 패널** — 목표는 터미널이 아닌 우측 MISSION 카드(케이스 코드·진행도·현재 목표 강조)에
   분리 표시. 터미널 출력은 명령 결과·시스템 로그만 담는다.
 - **접근성/설정** — 글자 크기, 고대비, 모션 줄이기(`prefers-reduced-motion` 존중),

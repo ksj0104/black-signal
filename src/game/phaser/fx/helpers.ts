@@ -13,7 +13,7 @@ export interface SceneEnv {
 /** 페인터 간 프레임 상태(빗방울·먼지 등) — PixelScene 이 씬 수명 동안 유지 */
 export type Mem = Record<string, unknown>;
 
-/** 320×180 코드 드로잉 페인터. 외부 에셋 없이 Graphics 로만 그린다. */
+/** 640×360 생성 배경 위에 얹는 코드 이펙트 페인터. Graphics 로만 그린다. */
 export type Painter = (g: G, frame: number, env: SceneEnv, mem: Mem) => void;
 
 interface Drop {

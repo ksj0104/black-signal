@@ -1,6 +1,7 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { SCENES, sceneForChapter, type SceneApi } from '../content/scenes';
-import { SCENE_ART } from '../game/phaser/art';
 import { SCENE_FX } from '../game/phaser/fx';
 import { bgUrl } from '../game/phaser/bg';
 import { DLG_MOM, DLG_DESK_LOCK, DLG_PHONE_DONE } from '../content/dialogues';
@@ -41,11 +42,12 @@ describe('배경 에셋 URL', () => {
 
 describe('씬 정의 무결성', () => {
   const defs = Object.values(SCENES);
-  it('모든 씬에 페인터가 등록돼 있다', () => {
-    for (const d of defs) expect(typeof SCENE_ART[d.id]).toBe('function');
-  });
   it('모든 씬에 이펙트 페인터가 등록돼 있다', () => {
     for (const d of defs) expect(typeof SCENE_FX[d.id]).toBe('function');
+  });
+  it('모든 씬의 배경 확정본이 존재한다', () => {
+    for (const d of defs)
+      expect(existsSync(join(process.cwd(), 'public', 'scenes', `${d.id}.png`))).toBe(true);
   });
   it('핫스팟 id 는 씬 내에서 유일하고 라벨이 있다', () => {
     for (const d of defs) {

@@ -1,5 +1,5 @@
-import type { Painter } from '../art/helpers';
-import { dashRow, prand } from '../art/helpers';
+import type { Painter } from './helpers';
+import { dashRow, prand } from './helpers';
 
 /** 승강장: 전광판 스크롤 + CCTV LED 점멸 + 터널 헤드라이트 (640×360) */
 export const fxStation: Painter = (g, frame, env) => {

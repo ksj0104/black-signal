@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { PixelScene } from './phaser/PixelScene';
-import type { SceneEnv } from './phaser/art/helpers';
+import type { SceneEnv } from './phaser/fx/helpers';
 import type { SceneId } from '../content/scenes';
 import { useGame } from '../state/gameStore';
 

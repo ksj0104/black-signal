@@ -1,5 +1,5 @@
-import type { Painter } from '../art/helpers';
-import { rain, dashRow, prand } from '../art/helpers';
+import type { Painter } from './helpers';
+import { rain, dashRow, prand } from './helpers';
 
 /** 부모님 집: 창밖 비 + TV 화면 애니메이션 (640×360) */
 export const fxParents: Painter = (g, frame, env, mem) => {
