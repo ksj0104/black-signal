@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SCENES, sceneForChapter, type SceneApi } from '../content/scenes';
 import { SCENE_ART } from '../game/phaser/art';
+import { bgUrl } from '../game/phaser/bg';
 import { DLG_MOM, DLG_DESK_LOCK, DLG_PHONE_DONE } from '../content/dialogues';
 import { DLG_APT_PHONE_LATER } from '../content/dialogues/scenes';
 
@@ -27,6 +28,13 @@ describe('sceneForChapter — 챕터별 로케이션 매핑', () => {
     expect(sceneForChapter(3).id).toBe('soc');
     expect(sceneForChapter(4).id).toBe('station');
     expect(sceneForChapter(9).id).toBe('station');
+  });
+});
+
+describe('배경 에셋 URL', () => {
+  it('씬 id → public 경로', () => {
+    expect(bgUrl('apartment')).toBe('scenes/apartment.png');
+    expect(bgUrl('station')).toBe('scenes/station.png');
   });
 });
 

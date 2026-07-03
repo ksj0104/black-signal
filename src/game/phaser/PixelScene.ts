@@ -1,13 +1,18 @@
 import Phaser from 'phaser';
 import type { Mem, Painter, SceneEnv } from './art/helpers';
+import type { SceneId } from '../../content/scenes';
+import { SCENE_ART } from './art';
+import { SCENE_FX } from './fx';
+import { bgUrl } from './bg';
 
-/** 페인터를 주입받아 매 프레임 그리는 제네릭 320×180 픽셀 씬 */
+/** 640×360 픽셀 씬 — 생성 배경 PNG + 코드 이펙트. 배경 없으면 코드 아트 2× 폴백. */
 export class PixelScene extends Phaser.Scene {
   static KEY = 'pixel';
   private g!: Phaser.GameObjects.Graphics;
   private frame = 0;
   private mem: Mem = {};
-  private paint: Painter = () => {};
+  private sceneId: SceneId = 'apartment';
+  private hasBg = false;
   private getEnv: () => SceneEnv = () => ({
     chapter: 0,
     reduced: false,
@@ -18,17 +23,24 @@ export class PixelScene extends Phaser.Scene {
   constructor() {
     super(PixelScene.KEY);
   }
-  init(data: { paint?: Painter; getEnv?: () => SceneEnv }) {
-    if (data.paint) this.paint = data.paint;
+  init(data: { sceneId?: SceneId; getEnv?: () => SceneEnv }) {
+    if (data.sceneId) this.sceneId = data.sceneId;
     if (data.getEnv) this.getEnv = data.getEnv;
   }
+  preload() {
+    this.load.image('bg:' + this.sceneId, bgUrl(this.sceneId));
+  }
   create() {
+    this.hasBg = this.textures.exists('bg:' + this.sceneId);
+    if (this.hasBg) this.add.image(0, 0, 'bg:' + this.sceneId).setOrigin(0, 0);
     this.g = this.add.graphics();
+    if (!this.hasBg) this.g.setScale(2); // 320×180 좌표계 코드 아트 폴백
     this.mem = {};
   }
   update() {
     this.frame++;
     this.g.clear();
-    this.paint(this.g, this.frame, this.getEnv(), this.mem);
+    const paint: Painter = this.hasBg ? SCENE_FX[this.sceneId] : SCENE_ART[this.sceneId];
+    paint(this.g, this.frame, this.getEnv(), this.mem);
   }
 }

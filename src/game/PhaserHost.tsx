@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { PixelScene } from './phaser/PixelScene';
-import type { Painter, SceneEnv } from './phaser/art/helpers';
+import type { SceneEnv } from './phaser/art/helpers';
+import type { SceneId } from '../content/scenes';
 import { useGame } from '../state/gameStore';
 
-/** 주입받은 페인터로 320×180 픽셀 씬을 React 생명주기에 마운트 */
-export function PhaserHost({ paint, aria }: { paint: Painter; aria: string }) {
+/** 씬 id를 주입받아 640×360 픽셀 씬을 React 생명주기에 마운트 */
+export function PhaserHost({ sceneId, aria }: { sceneId: SceneId; aria: string }) {
   const host = useRef<HTMLDivElement>(null);
   const game = useRef<Phaser.Game | null>(null);
 
@@ -23,19 +24,19 @@ export function PhaserHost({ paint, aria }: { paint: Painter; aria: string }) {
     game.current = new Phaser.Game({
       type: Phaser.CANVAS,
       parent: host.current,
-      width: 320,
-      height: 180,
+      width: 640,
+      height: 360,
       pixelArt: true,
       backgroundColor: '#0b1020',
       scale: { mode: Phaser.Scale.NONE },
       banner: false,
     });
-    game.current.scene.add(PixelScene.KEY, PixelScene, true, { paint, getEnv });
+    game.current.scene.add(PixelScene.KEY, PixelScene, true, { sceneId, getEnv });
     return () => {
       game.current?.destroy(true);
       game.current = null;
     };
-  }, [paint]);
+  }, [sceneId]);
 
   return <div ref={host} className="pxHost" aria-label={aria} />;
 }

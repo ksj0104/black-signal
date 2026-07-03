@@ -1,6 +1,5 @@
 import { useGame } from '../state/gameStore';
 import { PhaserHost } from '../game/PhaserHost';
-import { SCENE_ART } from '../game/phaser/art';
 import { sceneForChapter, type SceneApi } from '../content/scenes';
 import { sClick } from '../engine/audio/audio';
 
@@ -28,7 +27,7 @@ export function SceneScreen() {
   return (
     <section id="scene" className="screen on">
       <div id="sceneWrap">
-        <PhaserHost key={def.id} paint={SCENE_ART[def.id]} aria={def.aria} />
+        <PhaserHost key={def.id} sceneId={def.id} aria={def.aria} />
         {def.hotspots.map((h) => (
           <button
             key={h.id}
