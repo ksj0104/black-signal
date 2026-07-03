@@ -1,12 +1,12 @@
 # BLACK SIGNAL 배경 생성 — 심야 승강장 — 접선 좌표
 
 너는 이미지 생성 도구를 가진 에이전트다. 아래 명세대로 배경 이미지 1장을
-생성해서 이 프로젝트의 `public/scenes/raw/station.png` 로 저장하라.
-`public/scenes/raw/` 폴더가 없으면 만들어라. 이미지 생성 외 다른 파일은
+생성해서 이 프로젝트의 `assets-src/scenes-raw/station.png` 로 저장하라.
+`assets-src/scenes-raw/` 폴더가 없으면 만들어라. 이미지 생성 외 다른 파일은
 수정하지 마라.
 
 ## 출력 계약
-- 파일: `public/scenes/raw/station.png`
+- 파일: `assets-src/scenes-raw/station.png`
 - 크기: 1280×720 (16:9). 이 크기로 생성이 안 되면 가장 가까운 16:9로 생성.
 - 최종 게임에서는 640×360으로 축소되므로, 4px(1280 기준) 미만의 미세 디테일은 넣지 마라.
 

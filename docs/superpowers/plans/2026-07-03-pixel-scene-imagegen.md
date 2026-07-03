@@ -14,6 +14,7 @@
 - 모든 씬 콘텐츠는 허구 데이터 — 실존 브랜드/인물/기관 표기 금지
 - 배경 확정본은 정확히 640×360 PNG, `public/scenes/<scene>.png`
 - 원본 생성물은 `public/scenes/raw/<scene>.png`, 1280×720 이상
+  (경로 변경: 원본은 assets-src/scenes-raw/ 로 이동 — dist 배포 크기 절감)
 - 이펙트는 `env.reduced`(모션 줄이기)를 존중한다
 - 4장 전부 확정되기 전에는 코드 아트 폴백을 삭제하지 않는다
 - 커밋 메시지 말미: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`
@@ -438,6 +439,8 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
 - Produces: `powershell -File scripts/downscale.ps1 -In <raw.png> -Out <final.png>` → 640×360 최근접 이웃 PNG
 
 - [ ] **Step 1: 스크립트 작성**
+
+> 주의: 이 스니펫은 초기안 — 실제 스크립트는 동일 경로 입출력·출력 폴더 생성을 처리하는 scripts/downscale.ps1 이 최종본이다.
 
 ```powershell
 param(

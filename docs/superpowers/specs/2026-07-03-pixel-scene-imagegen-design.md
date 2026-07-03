@@ -42,6 +42,7 @@ Get-Content docs/art-prompts/apartment.md -Raw | codex exec -
 ### 2. 이미지 처리 — 다운스케일 파이프라인
 
 - 원본: `public/scenes/raw/<scene>.png` (≥1280×720)
+  (경로 변경: 원본은 assets-src/scenes-raw/ 로 이동 — dist 배포 크기 절감)
 - 확정본: `public/scenes/<scene>.png` (640×360)
 - PowerShell + .NET System.Drawing 최근접 이웃 리사이즈 스크립트
   (`scripts/downscale.ps1`) — 새 npm 의존성 없음

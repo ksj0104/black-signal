@@ -78,6 +78,8 @@ const APARTMENT: SceneDef = {
       // window < desk < phone: 겹치는 구간(56~64%, 우측 모니터)에서는 desk가 배열상
       // 이후에 와서 window 위에 렌더링되어 클릭을 가져가고, phone은 desk/window 둘 다와
       // 겹치는 작은 타겟이므로 배열 맨 뒤에 두어 항상 최상단에서 클릭을 받는다.
+      // board는 배열 맨 뒤(desk 이후)에 위치해, desk와의 작은 모서리 겹침
+      // (x35~39%, y34~49%)에서도 board가 항상 클릭을 가져간다.
       rect: { l: 56, t: 5, w: 42, h: 52 },
       onClick: (a) => a.openDialogue(DLG_WIN),
     },
