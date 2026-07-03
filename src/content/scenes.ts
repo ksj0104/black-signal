@@ -74,7 +74,7 @@ const APARTMENT: SceneDef = {
     {
       id: 'phone',
       label: '휴대폰',
-      rect: { l: 57, t: 51, w: 7, h: 8 },
+      rect: { l: 61, t: 51, w: 6, h: 7 },
       pulse: (a) => a.chapter === 0 && !a.flags.phoneRead,
       onClick(a) {
         if (a.chapter >= 1) {
@@ -95,7 +95,7 @@ const APARTMENT: SceneDef = {
     {
       id: 'desk',
       label: '워크스테이션',
-      rect: { l: 35, t: 33, w: 20, h: 25 },
+      rect: { l: 35, t: 34, w: 29, h: 26 },
       pulse: (a) =>
         a.chapter >= 1 || (!!a.flags.deskUnlocked && !a.flags.prologueDone),
       onClick(a) {
@@ -109,13 +109,13 @@ const APARTMENT: SceneDef = {
     {
       id: 'window',
       label: '창문',
-      rect: { l: 69, t: 12, w: 29, h: 48 },
+      rect: { l: 64, t: 5, w: 34, h: 52 },
       onClick: (a) => a.openDialogue(DLG_WIN),
     },
     {
       id: 'board',
       label: '사건 게시판',
-      rect: { l: 6, t: 15, w: 18, h: 33 },
+      rect: { l: 16, t: 17, w: 23, h: 32 },
       onClick: (a) => a.openDialogue(a.boardUnlocked ? DLG_BOARD_LATER : DLG_BOARD_LOCK),
     },
   ],
