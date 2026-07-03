@@ -5,7 +5,9 @@ param(
   [int]$H = 360
 )
 Add-Type -AssemblyName System.Drawing
-$src = [System.Drawing.Image]::FromFile((Resolve-Path $In))
+$bytes = [System.IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $In).Path)
+$ms = New-Object System.IO.MemoryStream @(, $bytes)
+$src = [System.Drawing.Image]::FromStream($ms)
 try {
   $dst = New-Object System.Drawing.Bitmap($W, $H)
   $gfx = [System.Drawing.Graphics]::FromImage($dst)
@@ -14,7 +16,14 @@ try {
   $gfx.DrawImage($src, (New-Object System.Drawing.Rectangle(0, 0, $W, $H)),
     0, 0, $src.Width, $src.Height, [System.Drawing.GraphicsUnit]::Pixel)
   $gfx.Dispose()
+  $outDir = Split-Path -Parent $Out
+  if ($outDir -and -not (Test-Path -LiteralPath $outDir)) {
+    New-Item -ItemType Directory -Force $outDir | Out-Null
+  }
   $dst.Save($Out, [System.Drawing.Imaging.ImageFormat]::Png)
   $dst.Dispose()
   Write-Output "OK ${W}x${H} -> $Out"
-} finally { $src.Dispose() }
+} finally {
+  $src.Dispose()
+  $ms.Dispose()
+}
