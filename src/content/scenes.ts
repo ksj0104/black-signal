@@ -72,6 +72,30 @@ const APARTMENT: SceneDef = {
         : '워크스테이션이 로그인 대기 중이다.',
   hotspots: [
     {
+      id: 'window',
+      label: '창문',
+      // 좌측 경계는 실측 유리 시작점(≈56%)까지 확장. 배열 순서(렌더링/클릭 우선순위)는
+      // window < desk < phone: 겹치는 구간(56~64%, 우측 모니터)에서는 desk가 배열상
+      // 이후에 와서 window 위에 렌더링되어 클릭을 가져가고, phone은 desk/window 둘 다와
+      // 겹치는 작은 타겟이므로 배열 맨 뒤에 두어 항상 최상단에서 클릭을 받는다.
+      rect: { l: 56, t: 5, w: 42, h: 52 },
+      onClick: (a) => a.openDialogue(DLG_WIN),
+    },
+    {
+      id: 'desk',
+      label: '워크스테이션',
+      rect: { l: 35, t: 34, w: 29, h: 26 },
+      pulse: (a) =>
+        a.chapter >= 1 || (!!a.flags.deskUnlocked && !a.flags.prologueDone),
+      onClick(a) {
+        if (a.chapter === 0 && !a.flags.deskUnlocked) {
+          a.openDialogue(DLG_DESK_LOCK);
+          return;
+        }
+        a.setScreen('work');
+      },
+    },
+    {
       id: 'phone',
       label: '휴대폰',
       rect: { l: 61, t: 51, w: 6, h: 7 },
@@ -90,28 +114,6 @@ const APARTMENT: SceneDef = {
           a.setFlag('deskUnlocked', true);
           a.saveGame();
         });
-      },
-    },
-    {
-      id: 'window',
-      label: '창문',
-      // 좌측 경계는 실측 유리 시작점(≈56%)까지 확장. desk가 배열상 이후에 와서
-      // 겹치는 구간(56~64%, 우측 모니터)에서는 desk 버튼이 위에 렌더링되어 클릭을 가로챈다.
-      rect: { l: 56, t: 5, w: 42, h: 52 },
-      onClick: (a) => a.openDialogue(DLG_WIN),
-    },
-    {
-      id: 'desk',
-      label: '워크스테이션',
-      rect: { l: 35, t: 34, w: 29, h: 26 },
-      pulse: (a) =>
-        a.chapter >= 1 || (!!a.flags.deskUnlocked && !a.flags.prologueDone),
-      onClick(a) {
-        if (a.chapter === 0 && !a.flags.deskUnlocked) {
-          a.openDialogue(DLG_DESK_LOCK);
-          return;
-        }
-        a.setScreen('work');
       },
     },
     {
