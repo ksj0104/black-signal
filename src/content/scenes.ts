@@ -93,6 +93,14 @@ const APARTMENT: SceneDef = {
       },
     },
     {
+      id: 'window',
+      label: '창문',
+      // 좌측 경계는 실측 유리 시작점(≈56%)까지 확장. desk가 배열상 이후에 와서
+      // 겹치는 구간(56~64%, 우측 모니터)에서는 desk 버튼이 위에 렌더링되어 클릭을 가로챈다.
+      rect: { l: 56, t: 5, w: 42, h: 52 },
+      onClick: (a) => a.openDialogue(DLG_WIN),
+    },
+    {
       id: 'desk',
       label: '워크스테이션',
       rect: { l: 35, t: 34, w: 29, h: 26 },
@@ -105,12 +113,6 @@ const APARTMENT: SceneDef = {
         }
         a.setScreen('work');
       },
-    },
-    {
-      id: 'window',
-      label: '창문',
-      rect: { l: 64, t: 5, w: 34, h: 52 },
-      onClick: (a) => a.openDialogue(DLG_WIN),
     },
     {
       id: 'board',
