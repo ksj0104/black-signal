@@ -180,32 +180,40 @@ const SOC: SceneDef = {
     {
       id: 'wall',
       label: '메인 상황판',
-      rect: { l: 6, t: 7, w: 89, h: 28 },
+      // 실측: 3분할 패널 프레임이 13~71%, 6~38%. 우측 경계는 glass 핫스팟과
+      // x=71%에서 정확히 맞닿는다 (겹침 없음).
+      rect: { l: 13, t: 6, w: 58, h: 32 },
       onClick: (a) => a.openDialogue(DLG_SOC_WALL),
     },
     {
       id: 'hanna',
       label: '한나의 자리',
-      rect: { l: 16, t: 57, w: 20, h: 25 },
+      // 실측: 데스크+듀얼모니터+의자 클러스터가 스펙보다 왼쪽/위로 치우침.
+      // 좌측을 10%로 다듬어 coffee 핫스팟과의 1% 겹침을 제거.
+      rect: { l: 10, t: 47, w: 24, h: 38 },
       onClick: (a) => a.openDialogue(DLG_SOC_HANNA),
     },
     {
       id: 'console',
       label: '내 콘솔',
-      rect: { l: 42, t: 57, w: 24, h: 28 },
+      // 실측: 듀얼모니터+의자 클러스터가 스펙보다 위로 치우침 (모니터 상단 ≈47%).
+      rect: { l: 41, t: 47, w: 24, h: 40 },
       pulse: () => true,
       onClick: (a) => a.setScreen('work'),
     },
     {
       id: 'glass',
       label: '회의실',
-      rect: { l: 76, t: 39, w: 22, h: 38 },
+      // 실측: 유리벽이 스펙보다 훨씬 위(천장 인근, t≈16%)부터 시작하고
+      // 좌측 경계(71%)가 wall 핫스팟 우측 경계와 정확히 맞닿는다.
+      rect: { l: 71, t: 16, w: 27, h: 64 },
       onClick: (a) => a.openDialogue(DLG_SOC_GLASS),
     },
     {
       id: 'coffee',
       label: '커피 머신',
-      rect: { l: 2, t: 52, w: 8, h: 19 },
+      // 실측: 머신+카운터가 화면 좌측 끝(l0)부터 시작, 스펙보다 살짝 아래(t37)/넓게(h43).
+      rect: { l: 0, t: 37, w: 10, h: 43 },
       onClick: (a) => a.openDialogue(DLG_SOC_COFFEE),
     },
   ],
