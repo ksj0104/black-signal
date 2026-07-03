@@ -32,6 +32,7 @@ export function SceneScreen() {
           <button
             key={h.id}
             className={'hot' + (h.pulse?.(api) ? ' pulse' : '')}
+            aria-label={h.label}
             style={{
               left: h.rect.l + '%',
               top: h.rect.t + '%',
