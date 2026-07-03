@@ -1,0 +1,575 @@
+/* ============================================================
+   AEGIS OS — 가상 데스크톱 (워크스테이션 화면)
+   상태바 / 데스크톱+창 / 태스크바 / 알림 / 부트 / 앱별 스타일
+   ============================================================ */
+
+#work { background: var(--ink); }
+
+/* ---- 상태바 ---- */
+#osBar {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  height: 40px;
+  padding: 0 0.9rem;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+  z-index: 20;
+}
+.osBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-px);
+  font-size: 0.88em;
+  letter-spacing: 0.12em;
+  color: var(--txt);
+}
+.osBrand b { color: var(--phos); font-weight: 400; }
+.osDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--phos);
+  box-shadow: 0 0 8px rgba(126, 224, 200, 0.8);
+  animation: osPulse 3s ease-in-out infinite;
+}
+body.rm .osDot { animation: none; }
+@keyframes osPulse { 50% { opacity: 0.5; } }
+.osCase { color: var(--txt-dim); font-size: 0.82em; font-family: var(--font-mono); letter-spacing: 0.05em; }
+.osCase em { font-style: normal; color: var(--line-hi); }
+.osRight { margin-left: auto; display: flex; align-items: center; gap: 0.6rem; }
+.osClock { color: var(--txt-dim); font-family: var(--font-mono); font-size: 0.78em; }
+.osClock b { color: var(--phos); font-weight: 400; }
+.osBarBtn { padding: 0.22em 0.75em; font-size: 0.82em; background: transparent; }
+
+/* ---- 데스크톱 ---- */
+#osDesk { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.osWall {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 70% at 75% 15%, rgba(180, 140, 255, 0.05), transparent 60%),
+    radial-gradient(ellipse 80% 80% at 15% 95%, rgba(126, 224, 200, 0.05), transparent 55%),
+    repeating-linear-gradient(0deg, transparent 0 63px, rgba(28, 39, 64, 0.28) 63px 64px),
+    repeating-linear-gradient(90deg, transparent 0 63px, rgba(28, 39, 64, 0.28) 63px 64px),
+    var(--ink);
+}
+.osWall::after {
+  content: 'BLACK SIGNAL';
+  position: absolute;
+  right: 26px;
+  bottom: 16px;
+  font-family: var(--font-px);
+  font-size: 0.8rem;
+  letter-spacing: 0.4em;
+  color: rgba(126, 224, 200, 0.12);
+}
+
+/* ---- 창 ---- */
+.win {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 220px;
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: winIn 0.14s ease-out;
+}
+body.rm .win { animation: none; }
+@keyframes winIn {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
+}
+.win.focus {
+  border-color: var(--phos-dim);
+  box-shadow:
+    0 0 0 1px rgba(126, 224, 200, 0.18),
+    0 24px 64px rgba(0, 0, 0, 0.62);
+}
+.winHead {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  height: 34px;
+  padding: 0 0.4rem 0 0.8rem;
+  background: rgba(18, 26, 44, 0.85);
+  border-bottom: 1px solid var(--line);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex: 0 0 auto;
+}
+.winHead:active { cursor: grabbing; }
+.winIcon { color: var(--phos-dim); font-family: var(--font-mono); font-size: 0.8em; }
+.win.focus .winIcon { color: var(--phos); }
+.winTitle {
+  color: var(--txt-dim);
+  font-size: 0.74em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.win.focus .winTitle { color: var(--txt); }
+.winBtns { margin-left: auto; display: flex; gap: 0.2rem; }
+.winBtn {
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  font-size: 0.7em;
+  line-height: 1;
+  background: transparent;
+  border-color: transparent;
+  color: var(--txt-dim);
+}
+.winBtn:hover:not(:disabled) { background: var(--raised); border-color: var(--line); }
+.winBtn.close:hover { color: var(--alert); border-color: var(--alert); }
+.winBody { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.winResize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background:
+    linear-gradient(135deg, transparent 0 50%, var(--line-hi) 50% 56%, transparent 56% 68%, var(--line-hi) 68% 74%, transparent 74%);
+}
+
+/* ---- 태스크바 ---- */
+#osDock {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 46px;
+  padding: 0 0.7rem;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  flex: 0 0 auto;
+  z-index: 20;
+}
+.dockBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  height: 32px;
+  padding: 0 0.9em;
+  font-size: 0.8em;
+  background: transparent;
+  border-color: transparent;
+  color: var(--txt-dim);
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+}
+.dockBtn:hover:not(:disabled) { color: var(--txt); background: var(--raised); }
+.dockBtn.on { color: var(--txt); border-bottom-color: var(--phos-dim); }
+.dockBtn.top { color: var(--phos); border-bottom-color: var(--phos); background: rgba(126, 224, 200, 0.06); }
+.dockIcon { font-family: var(--font-mono); font-size: 0.92em; }
+.dockDot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 7px rgba(232, 181, 74, 0.9);
+  animation: osPulse 1.4s ease-in-out infinite;
+}
+.dockHint { margin-left: auto; color: var(--txt-dim); font-size: 0.68em; font-family: var(--font-mono); }
+
+/* ---- 알림 스택 ---- */
+#osNotices {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(340px, 80vw);
+  pointer-events: none;
+}
+.notice {
+  pointer-events: auto;
+  cursor: pointer;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--phos-dim);
+  border-left: 3px solid var(--phos);
+  border-radius: 4px;
+  padding: 0.6em 0.9em;
+  font-size: 0.82em;
+  color: var(--txt);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  animation: noticeIn 0.22s ease-out;
+}
+body.rm .notice { animation: none; }
+@keyframes noticeIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: none; }
+}
+.noticeTag {
+  display: block;
+  color: var(--phos);
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.25em;
+}
+
+/* ---- 부트 시퀀스 ---- */
+#osBoot {
+  position: absolute;
+  inset: 0;
+  z-index: 4000;
+  background: #010204;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.bootBox { width: min(620px, 88vw); font-family: var(--font-mono); font-size: 0.88em; }
+.bootLine { color: var(--txt-dim); line-height: 1.9; }
+.bootLine::before { content: '▪ '; color: var(--phos-dim); }
+.bootLogo {
+  margin-top: 1rem;
+  font-family: var(--font-px);
+  font-size: 1.7em;
+  letter-spacing: 0.16em;
+  color: var(--phos);
+  text-shadow: 0 0 18px rgba(126, 224, 200, 0.5);
+}
+.bootLogo span { font-size: 0.5em; color: var(--txt-dim); letter-spacing: 0.3em; text-shadow: none; }
+.bootSkip { margin-top: 2.2rem; color: var(--txt-dim); font-size: 0.74em; opacity: 0.7; }
+
+/* ============ 앱: 터미널 ============ */
+.pane { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+#paneTerm { background: rgba(2, 4, 9, 0.72); font-family: var(--font-mono); }
+#termOut {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.85rem 1rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  scroll-behavior: smooth;
+  font-size: 0.92em;
+  line-height: 1.55;
+}
+body.rm #termOut { scroll-behavior: auto; }
+#termOut > div { animation: termIn 0.1s ease-out; }
+body.rm #termOut > div { animation: none; }
+@keyframes termIn { from { opacity: 0; } to { opacity: 1; } }
+#termOut .cmd { color: var(--txt); }
+#termOut .cmd::first-line { color: var(--phos-dim); }
+#termOut .err { color: var(--alert); }
+#termOut .ok { color: var(--phos); }
+#termOut .dim { color: var(--txt-dim); }
+#termLine {
+  display: flex;
+  gap: 0.5em;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--line);
+  background: rgba(18, 26, 44, 0.5);
+  font-size: 0.92em;
+}
+#prompt { color: var(--phos-dim); white-space: nowrap; font-family: var(--font-mono); }
+
+/* ============ 앱: 증거 보드 ============ */
+#paneBoard { position: relative; }
+#board {
+  flex: 1;
+  position: relative;
+  margin: 0;
+  border: none;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(126, 224, 200, 0.045), transparent 40%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(28, 39, 64, 0.35) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(28, 39, 64, 0.35) 39px 40px),
+    rgba(4, 6, 11, 0.6);
+  overflow: hidden;
+  min-height: 0;
+}
+#boardSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.node {
+  position: absolute;
+  max-width: 200px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: 3px;
+  padding: 0.42rem 0.62rem;
+  font-size: 0.79em;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.node:active { cursor: grabbing; }
+.node .k {
+  display: block;
+  font-size: 0.74em;
+  color: var(--txt-dim);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+.node.person { border-left-color: var(--amber); }
+.node.server { border-left-color: var(--phos); }
+.node.org { border-left-color: var(--violet); }
+.node.item { border-left-color: var(--txt-dim); }
+.node.sel { outline: 2px solid var(--phos); box-shadow: 0 0 18px rgba(126, 224, 200, 0.25); }
+.node.linked { background: #16233f; }
+#deduce {
+  position: absolute;
+  inset: 7%;
+  background: rgba(4, 6, 11, 0.97);
+  border: 1px solid var(--phos-dim);
+  border-radius: 5px;
+  padding: 1.5rem 1.7rem;
+  overflow-y: auto;
+  z-index: 5;
+  line-height: 1.8;
+}
+#deduce h3 { color: var(--phos); letter-spacing: 0.12em; font-size: 1em; }
+#boardBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 1rem;
+  color: var(--txt-dim);
+  font-size: 0.76em;
+  border-top: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+#linkCount { color: var(--phos); font-family: var(--font-mono); }
+
+/* ============ 앱: 케이스 파일 ============ */
+#paneCase { overflow-y: auto; }
+#casePane { padding: 1.1rem 1.4rem; line-height: 1.75; }
+#casePane h3 {
+  color: var(--amber);
+  font-size: 0.8em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.22em;
+  margin-top: 1.4em;
+}
+#casePane h3:first-child { margin-top: 0; }
+
+/* ============ 앱: SIGNAL 메신저 ============ */
+.msgr { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.msgrList { flex: 1; overflow-y: auto; padding: 0.9rem 0.9rem 0.6rem; display: flex; flex-direction: column; gap: 0.28rem; }
+.msgrEmpty {
+  margin: auto;
+  text-align: center;
+  color: var(--txt-dim);
+  font-size: 0.82em;
+  line-height: 2;
+  font-family: var(--font-mono);
+}
+.msgSys {
+  align-self: center;
+  color: var(--violet);
+  font-size: 0.74em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  padding: 0.3em 0.9em;
+  border: 1px dashed rgba(180, 140, 255, 0.4);
+  border-radius: 999px;
+  margin: 0.35rem 0;
+  max-width: 92%;
+  text-align: center;
+  white-space: pre-wrap;
+}
+.msgRow { display: flex; flex-direction: column; align-items: flex-start; max-width: 88%; }
+.msgRow.me { align-self: flex-end; align-items: flex-end; }
+.msgName {
+  color: var(--amber);
+  font-size: 0.68em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+  margin: 0.45rem 0 0.18rem;
+}
+.msgRow.me .msgName { color: var(--phos-dim); }
+.msgBubble {
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 3px 10px 10px 10px;
+  padding: 0.5em 0.85em;
+  font-size: 0.88em;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  animation: msgIn 0.16s ease-out;
+}
+body.rm .msgBubble { animation: none; }
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+.msgRow.me .msgBubble {
+  background: rgba(126, 224, 200, 0.09);
+  border-color: var(--phos-dim);
+  border-radius: 10px 3px 10px 10px;
+}
+.msgBubble.choice { color: var(--phos); }
+.msgBubble.typing { display: flex; gap: 4px; padding: 0.75em 0.9em; }
+.msgBubble.typing i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--txt-dim);
+  animation: typDot 1s ease-in-out infinite;
+}
+.msgBubble.typing i:nth-child(2) { animation-delay: 0.16s; }
+.msgBubble.typing i:nth-child(3) { animation-delay: 0.32s; }
+body.rm .msgBubble.typing i { animation: none; }
+@keyframes typDot { 40% { transform: translateY(-4px); opacity: 1; } 0%, 100% { opacity: 0.4; } }
+.msgrChoices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.7rem 0.9rem 0.85rem;
+  border-top: 1px solid var(--line);
+  background: rgba(18, 26, 44, 0.45);
+}
+.msgrChoices button { text-align: left; font-size: 0.86em; border-left: 3px solid var(--phos-dim); }
+
+/* ============ 앱: 미션 ============ */
+.missionApp { padding: 0.95rem 1rem 1.1rem; overflow-y: auto; flex: 1; }
+.mHead { display: flex; align-items: baseline; justify-content: space-between; }
+.eyebrow { color: var(--phos); font-size: 0.68em; font-family: var(--font-mono); letter-spacing: 0.3em; }
+.mProg { color: var(--phos); font-size: 1.1em; font-weight: 700; font-family: var(--font-mono); }
+.mProgTot { color: var(--txt-dim); font-size: 0.68em; font-weight: 400; }
+.mCode { color: var(--amber); font-size: 0.72em; font-family: var(--font-mono); letter-spacing: 0.14em; margin-top: 0.6em; }
+.mTitle { font-size: 1.02em; font-weight: 700; margin: 0.1em 0 0.7em; }
+.mBarTrack { height: 3px; background: var(--ink); margin-bottom: 0.8rem; border-radius: 2px; overflow: hidden; }
+.mBarTrack i { display: block; height: 100%; background: var(--phos); transition: width 0.4s; }
+body.rm .mBarTrack i { transition: none; }
+.mDone { margin-top: 0.6em; color: var(--phos); font-size: 0.78em; }
+.mObjs { display: flex; flex-direction: column; }
+.obj {
+  display: flex;
+  gap: 0.5em;
+  font-size: 0.82em;
+  margin: 0.12em 0;
+  padding: 0.3em 0.45em;
+  color: var(--txt-dim);
+  border-left: 2px solid transparent;
+  border-radius: 0 3px 3px 0;
+}
+.obj .bx { color: var(--txt-dim); flex: 0 0 auto; font-family: var(--font-mono); }
+.obj.cur { color: var(--txt); background: rgba(126, 224, 200, 0.07); border-left-color: var(--phos); }
+.obj.cur .bx { color: var(--phos); }
+.obj.done .bx { color: var(--phos); }
+.obj.done span:last-child { text-decoration: line-through; opacity: 0.6; }
+.mSection {
+  color: var(--txt-dim);
+  font-size: 0.7em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.26em;
+  margin: 1.4em 0 0.6em;
+  padding-top: 1em;
+  border-top: 1px dashed var(--line);
+}
+.statRow { margin: 0.5em 0; }
+.statRow .lbl { display: flex; justify-content: space-between; font-size: 0.76em; color: var(--txt-dim); font-family: var(--font-mono); }
+.bar { height: 5px; background: var(--ink); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--phos); transition: width 0.4s; }
+.bar.amber i { background: var(--amber); }
+.bar.violet i { background: var(--violet); }
+.bar.red i { background: var(--alert); }
+body.rm .bar i { transition: none; }
+
+/* ---- 고대비: 유리효과 제거 ---- */
+body.hc .win, body.hc #osBar, body.hc #osDock, body.hc .notice { backdrop-filter: none; }
+
+/* ---- CCTV REVIEW 앱 ---- */
+.cctvWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  height: 100%;
+  padding: 0.8rem;
+  overflow: auto;
+}
+.cctvCams { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.cctvCam {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  align-items: flex-start;
+  padding: 0.45em 0.7em;
+  background: rgba(11, 15, 26, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.82em;
+  color: var(--txt-dim);
+}
+.cctvCam b { color: var(--txt); font-family: var(--font-mono); font-weight: 400; }
+.cctvCam.on { border-color: var(--phos); color: var(--txt); }
+.cctvCam.on b { color: var(--phos); }
+.cctvSyncTag { font-size: 0.86em; font-family: var(--font-mono); color: var(--amber); }
+.cctvCam.on .cctvSyncTag { color: var(--phos); }
+.cctvMain { display: flex; gap: 0.9rem; flex: 1; min-height: 0; align-items: flex-start; }
+.cctvView { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.cctvView canvas {
+  width: 100%;
+  max-width: 640px;
+  image-rendering: pixelated;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #05070c;
+  display: block;
+}
+.cctvView input[type='range'] { width: 100%; max-width: 640px; accent-color: var(--phos); }
+.cctvEvent {
+  font-size: 0.85em;
+  color: var(--txt);
+  line-height: 1.5;
+  max-width: 640px;
+}
+.cctvTime {
+  display: inline-block;
+  margin-right: 0.7em;
+  font-family: var(--font-mono);
+  color: var(--txt-dim);
+}
+.cctvTime em { font-style: normal; color: var(--phos); }
+.cctvMeta {
+  flex: 0 0 200px;
+  padding: 0.7rem 0.8rem;
+  background: rgba(11, 15, 26, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+.cctvMeta h4 { margin: 0 0 0.6em; color: var(--phos); font-size: 0.92em; letter-spacing: 0.08em; }
+.cctvMeta dl { display: grid; grid-template-columns: auto 1fr; gap: 0.3em 0.7em; margin: 0; }
+.cctvMeta dt { color: var(--txt-dim); }
+.cctvMeta dd { margin: 0; font-family: var(--font-mono); color: var(--txt); }
+.cctvWarn { color: var(--alert); }
+.cctvNote { margin: 0.8em 0 0; color: var(--txt-dim); line-height: 1.6; }
+.cctvNote code { color: var(--phos); font-family: var(--font-mono); }
+@media (max-width: 760px) {
+  .cctvMain { flex-direction: column; }
+  .cctvMeta { flex: none; width: 100%; }
+}
+
+/* ---- 좁은 화면 ---- */
+@media (max-width: 900px) {
+  .dockHint { display: none; }
+  .osCase { display: none; }
+}

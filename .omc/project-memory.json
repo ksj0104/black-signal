@@ -1,0 +1,323 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1783078609170,
+  "projectRoot": "C:\\Users\\seong\\OneDrive\\문서\\black-signal-project",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "@playwright/test",
+        "version": "1.49.0",
+        "category": "testing"
+      },
+      {
+        "name": "vite",
+        "version": "6.0.3",
+        "category": "build"
+      },
+      {
+        "name": "vitest",
+        "version": "2.1.8",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "vite",
+      "build": "tsc --noEmit && vite build",
+      "preview": "vite preview",
+      "test": "vitest run",
+      "test:e2e": "playwright test",
+      "lint": "eslint src",
+      "format": "prettier -w src"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "public",
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 1,
+      "lastAccessed": 1783078609087,
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 3,
+      "lastAccessed": 1783078609103,
+      "keyFiles": [
+        "DESIGN.md",
+        "PLAN.md",
+        "UI-REDESIGN.md"
+      ]
+    },
+    "e2e": {
+      "path": "e2e",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1783078609104,
+      "keyFiles": [
+        "smoke.spec.ts"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1783078609106,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1783078609108,
+      "keyFiles": [
+        "main.tsx"
+      ]
+    },
+    "{src": {
+      "path": "{src",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1783078609111,
+      "keyFiles": []
+    },
+    "dist\\assets": {
+      "path": "dist\\assets",
+      "purpose": "Static assets",
+      "fileCount": 98,
+      "lastAccessed": 1783078609114,
+      "keyFiles": [
+        "d2coding-bold-subset-Btf4qauX.woff2",
+        "d2coding-subset-dg0t4C3N.woff2",
+        "Galmuri11-DfQIlyDK.woff2"
+      ]
+    },
+    "src\\app": {
+      "path": "src\\app",
+      "purpose": "Application code",
+      "fileCount": 1,
+      "lastAccessed": 1783078609119,
+      "keyFiles": [
+        "App.tsx"
+      ]
+    },
+    "src\\components": {
+      "path": "src\\components",
+      "purpose": "UI components",
+      "fileCount": 8,
+      "lastAccessed": 1783078609123,
+      "keyFiles": [
+        "CasePane.tsx",
+        "EndScreen.tsx",
+        "IntroScreen.tsx"
+      ]
+    },
+    "src\\tests": {
+      "path": "src\\tests",
+      "purpose": "Test files",
+      "fileCount": 11,
+      "lastAccessed": 1783078609124,
+      "keyFiles": [
+        "campaign.test.ts",
+        "cctv.test.ts",
+        "chapters.test.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src\\state\\gameStore.ts",
+      "accessCount": 2,
+      "lastAccessed": 1783078930278,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1783078657222,
+      "type": "file"
+    },
+    {
+      "path": "src\\content\\scenes.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783078887249,
+      "type": "file"
+    },
+    {
+      "path": "src",
+      "accessCount": 1,
+      "lastAccessed": 1783078904172,
+      "type": "directory"
+    },
+    {
+      "path": "src\\engine\\save\\save.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783078914037,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\MenuScreen.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1783078928962,
+      "type": "file"
+    },
+    {
+      "path": "src\\game\\PhaserHost.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1783078946072,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1783079014376,
+      "type": "directory"
+    },
+    {
+      "path": "scene-apartment.png",
+      "accessCount": 1,
+      "lastAccessed": 1783079019848,
+      "type": "file"
+    },
+    {
+      "path": "scene-apartment-clean.png",
+      "accessCount": 1,
+      "lastAccessed": 1783079117864,
+      "type": "file"
+    },
+    {
+      "path": "scene-parents.png",
+      "accessCount": 1,
+      "lastAccessed": 1783079118427,
+      "type": "file"
+    },
+    {
+      "path": "scene-soc.png",
+      "accessCount": 1,
+      "lastAccessed": 1783079118831,
+      "type": "file"
+    },
+    {
+      "path": "scene-station.png",
+      "accessCount": 1,
+      "lastAccessed": 1783079119134,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\App.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1783079136488,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\SceneScreen.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1783079145892,
+      "type": "file"
+    },
+    {
+      "path": "scene-parents2.png",
+      "accessCount": 1,
+      "lastAccessed": 1783079182661,
+      "type": "file"
+    },
+    {
+      "path": "docs\\superpowers\\specs\\2026-07-03-pixel-scene-imagegen-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1783079679809,
+      "type": "file"
+    },
+    {
+      "path": "src\\game\\phaser\\PixelScene.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783079736517,
+      "type": "file"
+    },
+    {
+      "path": "src\\game\\phaser\\art\\helpers.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783079737143,
+      "type": "file"
+    },
+    {
+      "path": "src\\game\\phaser\\art\\index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783079737546,
+      "type": "file"
+    },
+    {
+      "path": "src\\tests\\scenes.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783079738210,
+      "type": "file"
+    },
+    {
+      "path": "src\\styles\\global.css",
+      "accessCount": 1,
+      "lastAccessed": 1783079745879,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\superpowers\\plans\\2026-07-03-pixel-scene-imagegen.md",
+      "accessCount": 1,
+      "lastAccessed": 1783079986325,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
