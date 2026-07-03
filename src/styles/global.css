@@ -340,23 +340,35 @@ body.rm .menuBtn:hover:not(:disabled) { transform: none; }
   background: transparent;
   border: 1px dashed transparent;
   border-radius: 2px;
-  color: transparent;
+  padding: 0;
+}
+.hotLabel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  visibility: hidden;
+  color: var(--phos);
   font-size: 0.72em;
   font-family: var(--font-px);
   letter-spacing: 0.1em;
-  padding: 0;
+  text-shadow: 0 0 8px rgba(126, 224, 200, 0.7);
+  background: rgba(6, 12, 24, 0.82);
+  padding: 2px 6px;
+  border-radius: 2px;
+  pointer-events: none;
 }
 .hot:hover, .hot:focus-visible {
   border-color: var(--phos);
-  color: var(--phos);
   background: rgba(126, 224, 200, 0.08);
-  text-shadow: 0 0 8px rgba(126, 224, 200, 0.7);
 }
+.hot:hover .hotLabel, .hot:focus-visible .hotLabel { visibility: visible; }
 .hot.pulse {
   animation: pulse 1.6s ease-in-out infinite;
   border-color: var(--amber);
-  color: var(--amber);
 }
+.hot.pulse .hotLabel { color: var(--amber); }
 body.rm .hot.pulse { animation: none; }
 @keyframes pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(232, 181, 74, 0.35); }

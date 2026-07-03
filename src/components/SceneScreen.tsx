@@ -44,7 +44,7 @@ export function SceneScreen() {
               h.onClick(api);
             }}
           >
-            {h.label}
+            <span className="hotLabel">{h.label}</span>
           </button>
         ))}
       </div>
