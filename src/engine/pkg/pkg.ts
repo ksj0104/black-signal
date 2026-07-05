@@ -28,6 +28,8 @@ export interface PkgDef {
   banner: string;
   categories: PkgCategory[];
   items: PkgItem[];
+  /** 봉인 헤더에 찍히는 사건/대상 라벨 (없으면 시즌1 기본값) */
+  caseLabel?: string;
 }
 
 /** 배치 상태: itemId → categoryId (gameStore flags 에 저장) */
@@ -145,7 +147,8 @@ export function pkgSeal(
   const unverified = placed.filter((i) => !i.verified);
   const clean = unverified.length === 0;
   const witness = inCat(def, state, 'witness').some((i) => i.verified);
-  const lines = ['[EVIDENCE PACKAGE — FINAL]  사건: BLACK SIGNAL / 대상: ORBIS VALE CAPITAL'];
+  const label = def.caseLabel ?? '사건: BLACK SIGNAL / 대상: ORBIS VALE CAPITAL';
+  const lines = ['[EVIDENCE PACKAGE — FINAL]  ' + label];
   for (const c of def.categories)
     lines.push(`  ■ ${c.name.padEnd(12)} ${inCat(def, state, c.id).map((i) => i.label).join(' · ')}`);
   lines.push('');

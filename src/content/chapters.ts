@@ -16,6 +16,9 @@ import { BALLAST_FS } from './filesystems/ballast';
 import { BALLAST_PYLAB } from './datasets/ballast';
 import { CERTCHAIN_FS } from './filesystems/certchain';
 import { CERTCHAIN_DB } from './databases/certchain';
+import { QUIETLANDSLIDE_FS } from './filesystems/quietlandslide';
+import { QUIETLANDSLIDE_DB } from './databases/quietlandslide';
+import { QUIETLANDSLIDE_PKG } from './pkg/quietlandslide';
 import {
   DLG_PROLOGUE_FINALE,
   DLG_CH1_FINALE,
@@ -41,6 +44,9 @@ import {
   DLG_CH9_MERIDIAN,
   DLG_CH9_THREAT,
   DLG_CH9_FINALE,
+  DLG_CH10_BUYER,
+  DLG_CH10_ARCHITECT,
+  DLG_CH10_FINALE,
   dlgCh1Open,
   dlgCh2Open,
   dlgCh3Open,
@@ -50,6 +56,7 @@ import {
   dlgCh7Open,
   dlgCh8Open,
   dlgCh9Open,
+  dlgCh10Open,
 } from './dialogues';
 
 export const CHAPTERS: Record<number, ChapterDef> = {
@@ -1598,7 +1605,164 @@ export const CHAPTERS: Record<number, ChapterDef> = {
       nextTitle: 'CHAPTER 10 예고 — "조용한 압승"',
       nextBody:
         '"표를 훔치지 않는다. 오차 범위 안에서 이기게 만들 뿐."<br>Meridian 의 \'결과 보증\' 상품은 누가 샀는가 — 발주 비선(秘線).<br>그리고 그 모든 것을 설계한 개인. 시즌의 마지막 신호가<br>가장 조용한 승리의 방을 연다.',
-      pendingNote: '· SEASON 2 — 다음 신호를 기다리는 중 ·',
+      nextNote: '· 시즌 피날레 — pkg 증거 패키지 조립 + query ·',
+    },
+  },
+  10: {
+    id: 10,
+    code: 'CASE AR-2026-1215',
+    title: 'Chapter 10 — The Quiet Landslide (시즌 피날레)',
+    root: '/cases/10_quiet_landslide',
+    fs: QUIETLANDSLIDE_FS,
+    db: QUIETLANDSLIDE_DB,
+    pkg: QUIETLANDSLIDE_PKG,
+    doneFlag: 'ch10Done',
+    objectives: [
+      { key: 'convene', label: '종합 브리핑 읽기  (cat briefing.txt)' },
+      { key: 'assemble', label: '증거 패키지 조립 — 6개 범주  (pkg add)' },
+      { key: 'buyer', label: '발주 비선 특정  (결과 보증 구매자 — query)' },
+      { key: 'architect', label: '설계자 개인 특정  (봉인 설계 메모 디코드)' },
+      { key: 'package', label: '최종 패키지 봉인  (pkg seal)' },
+    ],
+    fileTriggers: { '10_quiet_landslide/briefing.txt': 'convene' },
+    hints: {
+      convene: [
+        '마지막 수사도 브리핑에서 시작한다.',
+        'ls 로 파일을 확인하고 cat 으로 읽는다.',
+        'cat briefing.txt',
+      ],
+      assemble: [
+        '조각난 진실은 반박당한다 — 6개 범주를 채워 하나로 묶어라.',
+        'pkg 로 보관함을 보고, 각 증거를 맞는 범주에 배치하라. 미검증 출처는 피할 것.',
+        '예: pkg add turnout alloc  ·  pkg add cert cert  (6개 범주 전부)',
+      ],
+      buyer: [
+        '"결과 보증"을 산 쪽은 발주 기록에 남는다.',
+        'query 로 guarantee_orders 를 조회하라. 서류 밖 발주선(비선)이 보인다.',
+        'query SELECT * FROM guarantee_orders',
+      ],
+      architect: [
+        '설계자의 얼굴은 봉인된 내부 메모의 전결 서명에 있다.',
+        'evidence/ 의 .b64 는 인코딩된 텍스트다. 프롤로그에서 배운 그 방법.',
+        'base64 -d evidence/design_memo.b64',
+      ],
+      package: [
+        '6개 범주가 다 찼다면, 봉인만 남았다.',
+        '미검증 항목이 있으면 pkg remove 로 교체한 뒤 확정하라.',
+        'pkg seal',
+      ],
+    },
+    scan(txt, done) {
+      const out: { msg?: string; complete?: string }[] = [];
+      if (!done.assemble && /패키지 조립 완료 — 6\/6/.test(txt))
+        out.push({
+          msg: '[단서 확보] 패키지 조립 — 배부·집계·쌍둥이·주입·인증·법인이 하나의 서사로 묶였다.',
+          complete: 'assemble',
+        });
+      if (!done.buyer && /결과 보증/.test(txt) && /TF/.test(txt))
+        out.push({
+          msg: '[단서 확보] 발주 비선 — 결과 보증을 산 "한서 도시전략 비선 TF" (자금 관로에 시즌1 잔당).',
+          complete: 'buyer',
+        });
+      if (!done.architect && /도현우/.test(txt) && /전결/.test(txt))
+        out.push({
+          msg: '[단서 확보] 설계자 특정 — 봉인 메모의 전결 서명, 수석 전략가 도현우.',
+          complete: 'architect',
+        });
+      if (!done.package && /EVIDENCE PACKAGE — FINAL/.test(txt))
+        out.push({
+          msg: '[단서 확보] 최종 패키지 봉인 — 남은 것은 공개 전략이다.',
+          complete: 'package',
+        });
+      return out;
+    },
+    findings: {
+      assemble:
+        '여섯 개의 방. 배부, 집계, 쌍둥이, 주입, 인증, 법인.\n조각이 아니라 — 하나의 사업 구조가 보인다.\n\n(데이터 확보: 패키지 조립)',
+      buyer:
+        '결과 보증을 산 쪽 — 서류 밖의 발주선.\n그리고 그 자금의 뿌리에, 시즌1 에 무너뜨린 관로의 잔재가 있다.\n조작은 사업이었고, 사업은 대물림됐다.\n\n(데이터 확보: 발주 비선)',
+      architect:
+        '프로젝트명 QUIET LANDSLIDE. 전결 서명 — 도현우.\n그는 코드를 짜지 않았다. "어떻게 이겨야 티가 안 나는지"를 설계했다.\n손이 아니라, 머리다.\n\n(데이터 확보: 설계자 개인)',
+      package:
+        '봉인 완료. 해시 공증, 체인 오브 커스터디.\n이건 더 이상 조각이 아니다 — 신호다.\n\n(데이터 확보: 최종 패키지)',
+    },
+    events: {
+      buyer: { flag: 'ch10BuyerDone', beats: DLG_CH10_BUYER },
+      architect: { flag: 'ch10ArchitectDone', beats: DLG_CH10_ARCHITECT },
+    },
+    board: {
+      nodes: [
+        { id: 'citizens', k: '유권자', t: '피해 지역구 주민 (사람)', cls: 'person', x: 6, y: 14 },
+        { id: 'system', k: '조작 시스템', t: '배부·집계·검수 3결합', cls: 'server', x: 34, y: 8 },
+        { id: 'meridian', k: '공급 법인', t: 'Meridian Civic', cls: 'org', x: 40, y: 46 },
+        { id: 'buyer', k: '발주 비선', t: '한서 도시전략 비선 TF', cls: 'org', x: 74, y: 20 },
+        { id: 'architect', k: '설계자', t: '도현우 — QUIET LANDSLIDE 전결', cls: 'person', x: 82, y: 66 },
+        { id: 'package', k: '증거 패키지', t: '6범주 봉인 — 반박 불가', cls: 'item', x: 12, y: 66 },
+      ],
+      good: [
+        ['system', 'citizens'],
+        ['system', 'meridian'],
+        ['meridian', 'architect'],
+        ['meridian', 'buyer'],
+        ['package', 'system'],
+        ['package', 'architect'],
+      ],
+      why: {
+        'citizens-system': 'Ch7~9 — 배부·집계·검수 조작의 대상은 유권자의 표.',
+        'meridian-system': 'Ch8·Ch9 — 개표기·검수·배부 모델을 Meridian 이 공급.',
+        'architect-meridian': 'Ch10 — 봉인 메모 전결 서명, Meridian 수석 전략가 도현우.',
+        'buyer-meridian': 'Ch10 — 결과 보증을 발주한 비선 TF, 자금 관로에 시즌1 잔당 셸.',
+        'package-system': 'Ch10 — 6범주 패키지가 조작 시스템 전모를 입증.',
+        'architect-package': 'Ch10 — 패키지의 종착점이 설계자 도현우의 전결.',
+      },
+      deduce: `조용한 압승 — 표를 훔치지 않고, 오차 범위 안에서 이기게 만드는 사업.<br><br>
+· 조작 시스템(배부·집계·검수)은 <b class="c-phos">유권자의 표</b>를 겨냥했고<br>
+· 그 시스템을 <b>Meridian Civic</b> 이 공급했으며<br>
+· 상품을 산 <b>발주 비선</b>과 설계한 <b class="c-violet">도현우</b>가 그 뒤에 있다.<br><br>
+그리고 그 자금의 뿌리에는, 시즌1 에 무너뜨린 관로의 잔재가 있었다.<br>
+같은 손이 아니라, 같은 방식 — 조작은 대물림되는 사업이었다.<br><br>
+여섯 범주의 패키지가 봉인됐다. 남은 것은 — 이 신호를 어떻게 보낼 것인가.`,
+    },
+    greeting: [
+      'EVIDENCE MOUNT: /cases/10_quiet_landslide — 시즌 종합 (전 챕터 증거 + 봉인 설계 메모 · 허구 데이터)',
+      '도구 개방: pkg (증거 패키지 조립) + query  ·  base64 로 봉인 문서 열람',
+      '이번 사건 파일이 시즌의 마지막입니다. 목표는 우측 MISSION 패널.\n',
+    ],
+    openedFlag: 'ch10Opened',
+    opening: (flags) => dlgCh10Open((flags.ch9Choice as string) ?? null),
+    finale: DLG_CH10_FINALE,
+    caseSummary: {
+      target: '대상: MERIDIAN CIVIC — 시즌 종합 · 발주 비선·설계자 특정 · 최종 패키지',
+      clues: [
+        { key: 'convene', label: '종합 브리핑' },
+        { key: 'assemble', label: '패키지 6범주 조립' },
+        { key: 'buyer', label: '발주 비선 특정' },
+        { key: 'architect', label: '설계자 도현우 특정' },
+        { key: 'package', label: '최종 패키지 봉인' },
+      ],
+      hypothesis: {
+        locked:
+          'pkg 로 시즌 전체 증거를 6개 범주에 조립하고, query·base64 로 두 얼굴을 특정할 것.',
+        unlocked:
+          '조작 시스템 → <b class="c-phos">Meridian Civic</b> → 발주 비선과 설계자 <b class="c-violet">도현우</b>.<br>여섯 범주 패키지로 마스터 그래프를 완성하고 마지막 신호를 보낼 것.',
+      },
+      safety:
+        '본 사건의 선거·기관·지명·인물은 <b>전부 허구</b>이며, 실존 선거 제도·기관과 무관하다.<br>시스템을 파괴로 무너뜨리지 않는다 — 확보된 사본과 기록으로 시스템이 스스로를 재판하게 만든다.',
+    },
+    ending: {
+      doneTitle: 'FINAL — The Quiet Landslide',
+      summary: '시즌 종합 · 패키지 봉인 · 발주 비선·설계자 특정 · 마스터 그래프 6연결 완성',
+      choiceFlag: 'ch10Release',
+      choices: {
+        recount: '재검표 청구 — 법원에 결과 무효와 재검표를 청구했다.',
+        blast: '일제 공개 — 모두가 동시에 보게 했다.',
+        reform: '제도 이관 — 검증 절차를 다음 선거의 기준으로 만들었다.',
+        citizens: '주민 주체 — 피해 지역구 주민이 공개의 주체가 됐다.',
+      },
+      nextTitle: '에필로그',
+      nextBody: '',
+      finalEndingV2: true,
+      pendingNote: '· BLACK SIGNAL 시즌 2 — 캠페인 완결 · 새 수사는 메인 메뉴에서 ·',
     },
   },
 };

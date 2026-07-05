@@ -73,8 +73,10 @@ export interface EndingDef {
   nextBody: string; // 다음 챕터 예고 본문 (HTML)
   nextNote?: string; // 시작 버튼 위 안내 (다음 챕터가 구현된 경우)
   pendingNote?: string; // 다음 챕터 미구현 시 안내
-  /** 최종 챕터 — EndScreen 이 엔딩 결정 함수(A~D)와 에필로그를 렌더한다 */
+  /** 최종 챕터 — EndScreen 이 엔딩 결정 함수(A~D)와 에필로그를 렌더한다 (시즌1) */
   finalEnding?: boolean;
+  /** 시즌2 피날레 — EndScreen 이 ch10Release 선택별 에필로그(ENDINGS2)를 렌더한다 */
+  finalEndingV2?: boolean;
 }
 
 /** 목표 확보 시 1회 발동하는 스토리 이벤트 */

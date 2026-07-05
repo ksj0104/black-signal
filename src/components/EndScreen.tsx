@@ -2,6 +2,7 @@ import { useGame } from '../state/gameStore';
 import { CHAPTERS } from '../content/chapters';
 import { deriveEnding, resolveEnding } from '../engine/ending';
 import { ENDINGS } from '../content/endings';
+import { ENDINGS2 } from '../content/endings2';
 import { withName } from '../engine/persona';
 import { sClick } from '../engine/audio/audio';
 
@@ -50,6 +51,26 @@ function FinalEnding() {
   );
 }
 
+/** 시즌2 최종장 — ch10Release 선택별 에필로그 렌더 */
+function Season2FinalEnding() {
+  const flags = useGame((s) => s.flags);
+  const pname = useGame((s) => s.cfg.name);
+  const id = (flags.ch10Release as string) ?? 'reform';
+  const E = ENDINGS2[id] ?? ENDINGS2.reform;
+  return (
+    <div className="endFinal">
+      <div className="endingCode">{E.code}</div>
+      <h3 className="endingTitle">{E.title}</h3>
+      <p className="endingBody" dangerouslySetInnerHTML={{ __html: withName(E.body, pname) }} />
+      <div className="endingEpi">
+        <b>에필로그</b>
+        <p dangerouslySetInnerHTML={{ __html: withName(E.epilogue, pname) }} />
+      </div>
+      <div className="dimNote">· BLACK SIGNAL 시즌 2 — 완결 · 다른 선택은 다른 엔딩으로 이어집니다 ·</div>
+    </div>
+  );
+}
+
 export function EndScreen() {
   const s = useGame();
   const chd = CHAPTERS[s.chapter];
@@ -87,8 +108,9 @@ export function EndScreen() {
         </div>
 
         {e.finalEnding && <FinalEnding />}
-        {/* 최종장이라도 다음 시즌 챕터가 구현돼 있으면 에필로그 아래에 예고·시작 버튼을 노출 */}
-        {(!e.finalEnding || hasNext) && (
+        {e.finalEndingV2 && <Season2FinalEnding />}
+        {/* 최종장이라도 다음 챕터가 구현돼 있으면 에필로그 아래에 예고·시작 버튼을 노출 */}
+        {(!(e.finalEnding || e.finalEndingV2) || hasNext) && (
           <div className="endNext">
             <b>{e.nextTitle}</b>
             <p dangerouslySetInnerHTML={{ __html: e.nextBody }} />
