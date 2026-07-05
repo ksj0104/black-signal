@@ -12,6 +12,8 @@ import { BLACKSIGNAL_FS } from './filesystems/blacksignal';
 import { BLACKSIGNAL_PKG } from './pkg/blacksignal';
 import { TWINTALLY_FS } from './filesystems/twintally';
 import { TWINTALLY_DB } from './databases/twintally';
+import { BALLAST_FS } from './filesystems/ballast';
+import { BALLAST_PYLAB } from './datasets/ballast';
 import {
   DLG_PROLOGUE_FINALE,
   DLG_CH1_FINALE,
@@ -31,6 +33,9 @@ import {
   DLG_CH7_NW,
   DLG_CH7_THREAT,
   DLG_CH7_FINALE,
+  DLG_CH8_MODEL,
+  DLG_CH8_TAIL,
+  DLG_CH8_FINALE,
   dlgCh1Open,
   dlgCh2Open,
   dlgCh3Open,
@@ -38,6 +43,7 @@ import {
   dlgCh5Open,
   dlgCh6Open,
   dlgCh7Open,
+  dlgCh8Open,
 } from './dialogues';
 
 export const CHAPTERS: Record<number, ChapterDef> = {
@@ -1283,6 +1289,154 @@ export const CHAPTERS: Record<number, ChapterDef> = {
       nextTitle: 'CHAPTER 8 예고 — "Ballast"',
       nextBody:
         '재검표 논쟁 속에, 문제의 집계 유닛 한 대가 봉인·압수된다.<br>펌웨어 포렌식 이미지가 도착한다 — 서명 없는 모듈의 본체.<br>목표 득표율 테이블, 반올림 쿼터, 그리고 패치가 흘러들어온 길 —<br><b class="c-violet">cert-mirror-2</b>.',
+      nextNote: '· 새 도구 재개방: python 펌웨어 격리 분석 랩 ·',
+    },
+  },
+  8: {
+    id: 8,
+    code: 'CASE AR-2026-1103',
+    title: 'Chapter 8 — Ballast (시즌 2)',
+    root: '/cases/08_ballast',
+    fs: BALLAST_FS,
+    pylab: BALLAST_PYLAB,
+    doneFlag: 'ch8Done',
+    objectives: [
+      { key: 'intake', label: '브리핑 읽기  (cat briefing.txt)' },
+      { key: 'lab', label: '격리 분석 랩 접속  (python)' },
+      { key: 'target', label: 'ballast 목표 분포 테이블 추출  (python target ...)' },
+      { key: 'quota', label: '반올림 쿼터 재현 — 쌍둥이 증명  (python quota ...)' },
+      { key: 'inject', label: '주입 경로 특정  (python inject ...)' },
+    ],
+    fileTriggers: { '08_ballast/briefing.txt': 'intake' },
+    hints: {
+      intake: [
+        '펌웨어 포렌식도 브리핑에서 시작한다.',
+        'ls 로 파일을 확인하고 cat 으로 읽는다.',
+        'cat briefing.txt',
+      ],
+      lab: [
+        '새 도구는 언제나 인자 없이 먼저.',
+        'python 을 인자 없이 실행하면 데이터셋·템플릿 목록이 나온다.',
+        'python',
+      ],
+      target: [
+        '개표기가 표를 세는지, 결과를 맞추는지 — 내장 상수를 보면 안다.',
+        'target 템플릿으로 규모대별 목표 분포를 추출하라. band 는 A/B/C/all.',
+        'python target band=all',
+      ],
+      quota: [
+        '쌍둥이는 "같은 총계"에서 태어난다. Ch7 의 쌍둥이 개표구 총계를 떠올려라.',
+        'quota 템플릿에 쌍둥이 개표구의 공표 총계를 넣어 재현하라. (제3·11개표구 = 33280)',
+        'python quota total=33280',
+      ],
+      inject: [
+        '서명이 끊긴 지점이 곧 주입 지점이다.',
+        'inject 템플릿으로 부팅 로그의 미승인 모듈을 추적하라. module=blst.',
+        'python inject module=blst',
+      ],
+    },
+    scan(txt, done) {
+      const out: { msg?: string; complete?: string }[] = [];
+      if (!done.target && /BALLAST 목표 분포 테이블/.test(txt) && /blst-0\.9\.4/.test(txt))
+        out.push({
+          msg: '[단서 확보] ballast 목표 분포 — 규모대별 득표율이 하드코딩된 조작 상수.',
+          complete: 'target',
+        });
+      if (!done.quota && /쌍둥이 재현/.test(txt) && /제3개표구/.test(txt) && /제11개표구/.test(txt))
+        out.push({
+          msg: '[단서 확보] 반올림 쿼터 재현 — 같은 총계에 같은 쿼터, 쌍둥이의 인과를 증명.',
+          complete: 'quota',
+        });
+      if (!done.inject && /주입 지점/.test(txt) && /cert-mirror-2/.test(txt))
+        out.push({
+          msg: '[단서 확보] 주입 지점 cert-mirror-2 — 서명 없는 뒷문. 납품사 내부 소행이 아니다.',
+          complete: 'inject',
+        });
+      return out;
+    },
+    findings: {
+      target:
+        '규모대마다 득표율이 미리 박혀 있다.\n개표기는 세지 않았다 — 결과를 "맞췄다".\n숫자가 표를 따른 게 아니라, 표가 숫자를 따랐다.\n\n(데이터 확보: 목표 분포 테이블)',
+      quota:
+        '같은 총계엔 같은 쿼터. 제3·11개표구는 같은 물을 부은 그릇이었다.\n15,207 · 14,892 · 3,181 — 우연이 아니라 복제였다.\n쌍둥이의 인과가, 코드로 증명됐다.\n\n(데이터 확보: 반올림 쿼터 재현)',
+      inject:
+        '서명은 Suncrest 빌드에서 시작해 미러에서 끊긴다.\ncert-mirror-2 — 정규 채널이 아닌 뒷문.\n납품사 결함이 아니라, 심어진 것이다.\n\n(데이터 확보: 주입 경로)',
+    },
+    events: {
+      target: { flag: 'ch8ModelDone', beats: DLG_CH8_MODEL },
+      inject: { flag: 'ch8TailDone', beats: DLG_CH8_TAIL },
+    },
+    board: {
+      nodes: [
+        { id: 'fw', k: '펌웨어 이미지', t: 'TB-11 압수 사본', cls: 'server', x: 6, y: 12 },
+        { id: 'blst', k: '조작 모듈', t: 'blst-0.9.4 "ballast"', cls: 'server', x: 8, y: 62 },
+        { id: 'target', k: '목표 분포', t: '규모대별 득표율 상수', cls: 'item', x: 38, y: 8 },
+        { id: 'quota', k: '반올림 쿼터', t: '정수 쿼터 = 덮어쓰기', cls: 'item', x: 40, y: 60 },
+        { id: 'twins', k: '쌍둥이 표', t: '3·11 / 5·9 / 8·14', cls: 'item', x: 70, y: 34 },
+        { id: 'mirror', k: '주입 지점', t: 'cert-mirror-2 (뒷문)', cls: 'server', x: 80, y: 72 },
+      ],
+      good: [
+        ['fw', 'blst'],
+        ['blst', 'target'],
+        ['target', 'quota'],
+        ['quota', 'twins'],
+        ['blst', 'mirror'],
+        ['mirror', 'fw'],
+      ],
+      why: {
+        'blst-fw': '압수 이미지 부팅·모듈 맵 — 서명 없는 blst-0.9.4 가 이미지 안에 존재.',
+        'blst-target': '역어셈블 — blst 가 규모대별 목표 분포 테이블을 내장(하드코딩).',
+        'quota-target': 'target → 정수 쿼터로 동결 — 목표 분포가 덮어쓰기용 쿼터로 굳어짐.',
+        'quota-twins': 'quota 재현 — 같은 총계(예 33280)의 개표구에 동일 쿼터 → 완전 일치.',
+        'blst-mirror': 'inject 추적 — blst 의 출처 채널이 cert-mirror-2 (서명 없음).',
+        'fw-mirror': '패치 사슬 — 미러가 서명본을 우회해 유닛 펌웨어로 배포.',
+      },
+      deduce: `ballast 는 표를 세지 않는다. <b>맞춘다</b>.<br><br>
+· 규모대별 <b class="c-phos">목표 분포</b>를 미리 정해 두고<br>
+· 그 목표를 <b>정수 쿼터</b>로 굳혀 개표구에 덮어쓴다.<br>
+· 같은 총계의 개표구엔 같은 쿼터 — 그래서 <b class="c-phos">쌍둥이</b>가 태어났다.<br><br>
+그리고 이 목표를 심은 문은 Suncrest 정문이 아니라 —<br>
+<b class="c-violet">cert-mirror-2</b> 라는 뒷문이었다.<br><br>
+코드가 무엇을 했는지는 밝혔다. 남은 질문은 — 누가 목표를 주었는가.`,
+    },
+    greeting: [
+      'EVIDENCE MOUNT: /cases/08_ballast — TB-11 펌웨어 포렌식 이미지 (읽기 전용 · 허구 데이터)',
+      '도구 재개방: python  (펌웨어 격리 분석 랩 · 인자 없이 실행하면 개요)',
+      '목표는 우측 MISSION 패널 · 막히면 hint.\n',
+    ],
+    openedFlag: 'ch8Opened',
+    opening: (flags) => dlgCh8Open((flags.ch7Choice as string) ?? null),
+    finale: DLG_CH8_FINALE,
+    caseSummary: {
+      target: '대상: 압수 집계 유닛 TB-11 펌웨어 이미지 · 법원 봉인 사본 · 정식 수사 공조',
+      clues: [
+        { key: 'intake', label: '사건 브리핑' },
+        { key: 'lab', label: '격리 랩 접속' },
+        { key: 'target', label: '목표 분포 테이블' },
+        { key: 'quota', label: '반올림 쿼터 재현' },
+        { key: 'inject', label: '주입 경로 cert-mirror-2' },
+      ],
+      hypothesis: {
+        locked:
+          'python 랩에서 target → quota → inject 순으로 재현할 것. 인자 없이 python 부터.',
+        unlocked:
+          'ballast 는 <b class="c-phos">목표 분포로 표를 덮어쓴다</b> — 같은 총계엔 같은 쿼터(쌍둥이의 인과).<br>그 코드는 <b class="c-violet">cert-mirror-2</b> 뒷문으로 주입됐다 — 증거 보드에서 관계를 완성할 것.',
+      },
+      safety:
+        '본 사건의 선거·기관·지명·인물은 <b>전부 허구</b>이며, 실존 선거 제도·기관과 무관하다.<br>펌웨어는 격리 랩에서만 여는 <b>읽기 전용 사본</b>이며, 랩은 저작된 골격의 빈칸만 계산한다.',
+    },
+    ending: {
+      doneTitle: 'CHAPTER 8 완료 — Ballast',
+      summary: '펌웨어 포렌식 완료 · 목표 분포 추출 · 쌍둥이 인과 증명 · 근거 연결 6건 완성',
+      choiceFlag: 'ch8Choice',
+      choices: {
+        escalate: '감정 신청 — 법원 포렌식 감정으로 재검표를 강제했다.',
+        expose: '기술 검증 공개 — 재현 절차를 열어 누구나 검증하게 했다.',
+        trace: '배후 우선 — 인증 사슬(CERT-9917)부터 조용히 당겼다.',
+      },
+      nextTitle: 'CHAPTER 9 예고 — "인증의 사슬"',
+      nextBody:
+        '주입은 밝혔다. 그러나 그 뒷문을 인증한 손은 아직 가려져 있다.<br>검수확인서 CERT-9917 의 서명자, 위조된 검수 보고서,<br>그리고 시범사업단 안의 협력자 — 사슬을 끝까지 당기면<br><b class="c-violet">Meridian Civic</b> 의 그림자가 드러난다.',
       pendingNote: '· SEASON 2 — 다음 신호를 기다리는 중 ·',
     },
   },

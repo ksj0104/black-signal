@@ -33,7 +33,7 @@ describe('챕터 데이터 무결성', () => {
 
 describe('챕터 프레임워크 일반화', () => {
   it('CHAPTER_IDS 가 오름차순으로 레지스트리를 반영한다', () => {
-    expect(CHAPTER_IDS).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(CHAPTER_IDS).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
   });
   it.each(CHAPTER_IDS)('챕터 %i: 프레임워크 필수 데이터가 모두 존재한다', (ch) => {
     const c = CHAPTERS[ch];
