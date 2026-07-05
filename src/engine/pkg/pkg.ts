@@ -70,7 +70,8 @@ export function pkgOverview(def: PkgDef, state: PkgState): string {
       }`,
     );
   }
-  lines.push('', '사용법: pkg add <증거> <카테고리> · pkg remove <증거> · pkg seal (8/8 확정)');
+  const n = def.categories.length;
+  lines.push('', `사용법: pkg add <증거> <카테고리> · pkg remove <증거> · pkg seal (${n}/${n} 확정)`);
   return lines.join('\n');
 }
 

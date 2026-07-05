@@ -116,6 +116,8 @@ interface UiState {
 
 interface UiActions {
   layout(vw: number, vh: number): void;
+  /** 데스크톱(뷰포트) 크기 변경 반영 — 창 위치를 새 경계 안으로 다시 가둔다 (배치는 보존) */
+  setDesktop(w: number, h: number): void;
   openWin(id: WinId): void;
   closeWin(id: WinId): void;
   minWin(id: WinId): void;
@@ -155,6 +157,29 @@ export const useUi = create<UiState & UiActions>()((set, get) => ({
     }));
   },
 
+  setDesktop(w, h) {
+    if (w <= 0 || h <= 0) return;
+    set((s) => {
+      if (s.desktop.w === w && s.desktop.h === h) return s;
+      return {
+        desktop: { w, h },
+        wins: Object.fromEntries(
+          (Object.keys(s.wins) as WinId[]).map((id) => {
+            const win = s.wins[id];
+            return [
+              id,
+              {
+                ...win,
+                // 창 크기는 보존하되, 새 경계 밖으로 나간 창은 헤더가 잡히도록 되돌린다
+                x: Math.max(0, Math.min(win.x, w - Math.min(win.w, 160))),
+                y: Math.max(0, Math.min(win.y, h - 40)),
+              },
+            ];
+          }),
+        ) as Record<WinId, WinState>,
+      };
+    });
+  },
   openWin(id) {
     const z = get().zTop + 1;
     set((s) => ({

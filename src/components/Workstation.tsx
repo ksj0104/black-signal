@@ -24,6 +24,7 @@ export function Workstation() {
   const openDialogue = useGame((s) => s.openDialogue);
   const laidOut = useUi((s) => s.laidOut);
   const layout = useUi((s) => s.layout);
+  const setDesktop = useUi((s) => s.setDesktop);
   const openWin = useUi((s) => s.openWin);
   const deskRef = useRef<HTMLDivElement>(null);
   const prevUnlock = useRef(boardUnlocked);
@@ -34,6 +35,22 @@ export function Workstation() {
     if (!el || laidOut) return;
     layout(el.clientWidth, el.clientHeight);
   }, [laidOut, layout]);
+
+  // 창 이동/리사이즈 클램프 기준이 실제 데스크톱 크기를 따라가도록 동기화
+  // (브라우저 리사이즈·전체창 전환 시 옛 경계에 갇히던 버그 방지)
+  useEffect(() => {
+    const el = deskRef.current;
+    if (!el) return;
+    const sync = () => setDesktop(el.clientWidth, el.clientHeight);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    window.addEventListener('resize', sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  }, [setDesktop]);
 
   // 챕터별 그리팅 + 오프닝 대화 (전부 챕터 데이터 기반)
   // StrictMode 의 effect 이중 실행에도 1회만 동작하도록 getState() 로 최신값을 읽는다

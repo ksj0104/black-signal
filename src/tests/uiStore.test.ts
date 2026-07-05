@@ -85,6 +85,25 @@ describe('창 관리', () => {
     expect(U().wins.term.w).toBeGreaterThanOrEqual(WIN_MIN_W);
     expect(U().wins.term.h).toBeGreaterThanOrEqual(WIN_MIN_H);
   });
+
+  it('setDesktop 은 리사이즈를 반영해 넓어진 영역으로 이동을 허용한다', () => {
+    U().layout(1280, 660);
+    U().setDesktop(2200, 1300);
+    expect(U().desktop).toEqual({ w: 2200, h: 1300 });
+    U().moveWin('term', 2000, 1100);
+    // 옛 1280×660 경계였다면 갇혔을 위치까지 이동 가능해야 한다
+    expect(U().wins.term.x).toBeGreaterThan(1280);
+    expect(U().wins.term.y).toBeGreaterThan(660);
+  });
+
+  it('setDesktop 축소 시 화면 밖 창을 경계 안으로 되돌린다', () => {
+    U().layout(1280, 660);
+    U().setDesktop(2200, 1300);
+    U().moveWin('term', 2000, 1100);
+    U().setDesktop(1000, 620);
+    expect(U().wins.term.x).toBeLessThanOrEqual(1000);
+    expect(U().wins.term.y).toBeLessThanOrEqual(620 - 40);
+  });
 });
 
 describe('알림 · 메신저 로그', () => {
