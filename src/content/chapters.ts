@@ -14,6 +14,8 @@ import { TWINTALLY_FS } from './filesystems/twintally';
 import { TWINTALLY_DB } from './databases/twintally';
 import { BALLAST_FS } from './filesystems/ballast';
 import { BALLAST_PYLAB } from './datasets/ballast';
+import { CERTCHAIN_FS } from './filesystems/certchain';
+import { CERTCHAIN_DB } from './databases/certchain';
 import {
   DLG_PROLOGUE_FINALE,
   DLG_CH1_FINALE,
@@ -36,6 +38,9 @@ import {
   DLG_CH8_MODEL,
   DLG_CH8_TAIL,
   DLG_CH8_FINALE,
+  DLG_CH9_MERIDIAN,
+  DLG_CH9_THREAT,
+  DLG_CH9_FINALE,
   dlgCh1Open,
   dlgCh2Open,
   dlgCh3Open,
@@ -44,6 +49,7 @@ import {
   dlgCh6Open,
   dlgCh7Open,
   dlgCh8Open,
+  dlgCh9Open,
 } from './dialogues';
 
 export const CHAPTERS: Record<number, ChapterDef> = {
@@ -1437,6 +1443,161 @@ export const CHAPTERS: Record<number, ChapterDef> = {
       nextTitle: 'CHAPTER 9 예고 — "인증의 사슬"',
       nextBody:
         '주입은 밝혔다. 그러나 그 뒷문을 인증한 손은 아직 가려져 있다.<br>검수확인서 CERT-9917 의 서명자, 위조된 검수 보고서,<br>그리고 시범사업단 안의 협력자 — 사슬을 끝까지 당기면<br><b class="c-violet">Meridian Civic</b> 의 그림자가 드러난다.',
+      nextNote: '· 도구: query 인증 기록 포렌식 콘솔 ·',
+    },
+  },
+  9: {
+    id: 9,
+    code: 'CASE AR-2026-1128',
+    title: 'Chapter 9 — The Chain of Certification (시즌 2)',
+    root: '/cases/09_cert_chain',
+    fs: CERTCHAIN_FS,
+    db: CERTCHAIN_DB,
+    doneFlag: 'ch9Done',
+    objectives: [
+      { key: 'intake', label: '브리핑 읽기  (cat briefing.txt)' },
+      { key: 'signer', label: 'CERT-9917 서명자 특정  (서명 레지스트리 조회 — query)' },
+      { key: 'forgery', label: '위조 검수 보고서 색출  (검수관 vs 정식 명단 대조)' },
+      { key: 'meridian', label: 'Meridian Civic 접점 특정  (파견·계약 조회)' },
+      { key: 'turnout', label: '투표지 부족의 기원 회수  (투표율 예측 모델 대조)' },
+    ],
+    fileTriggers: { '09_cert_chain/briefing.txt': 'intake' },
+    hints: {
+      intake: [
+        '인증 포렌식도 브리핑에서 시작한다.',
+        'ls 로 파일을 확인하고 cat 으로 읽는다.',
+        'cat briefing.txt',
+      ],
+      signer: [
+        '가려진 서명은 레지스트리에 그대로 남아 있다.',
+        'cert_registry 에서 CERT-9917 행을 조회하라.',
+        "query SELECT cert_id, subject, signer, org FROM cert_registry WHERE cert_id = 'CERT-9917'",
+      ],
+      forgery: [
+        '도장을 찍은 손이 권한자 명단에 있는가?',
+        'inspection_reports 의 검수관을 inspector_registry(정식 명단)와 대조하라.',
+        'query SELECT report_id, target, inspector FROM inspection_reports',
+      ],
+      meridian: [
+        '두 이름(남기협·표승우)이 실제로 어디 소속인지 계약이 말한다.',
+        'meridian_contracts 를 조회해 파견·납품 범위를 보라.',
+        'query SELECT * FROM meridian_contracts',
+      ],
+      turnout: [
+        '투표지 부족(Ch7 비트1)은 행정 실수였나, 설계였나?',
+        'turnout_model 에서 예측과 실제, 그리고 note 를 대조하라.',
+        'query SELECT precinct, meridian_pred, actual, note FROM turnout_model',
+      ],
+    },
+    scan(txt, done) {
+      const out: { msg?: string; complete?: string }[] = [];
+      if (!done.signer && /CERT-9917/.test(txt) && /남기협/.test(txt))
+        out.push({
+          msg: '[단서 확보] CERT-9917 서명자 남기협 — 시범사업단(Meridian 파견) 기술심의관.',
+          complete: 'signer',
+        });
+      if (!done.forgery && /표승우/.test(txt) && /cert-mirror-2/.test(txt))
+        out.push({
+          msg: '[단서 확보] 위조 검수 — 무권한 검수관 표승우가 cert-mirror-2 를 "검수 통과" 처리.',
+          complete: 'forgery',
+        });
+      if (!done.meridian && /Meridian Civic/.test(txt) && /파견/.test(txt))
+        out.push({
+          msg: '[단서 확보] Meridian Civic — 서명자·검수자를 파견하고 "결과 보증"을 판 배후 법인.',
+          complete: 'meridian',
+        });
+      if (!done.turnout && /MC-02 과소예측/.test(txt) && /투표지 부족/.test(txt))
+        out.push({
+          msg: '[단서 확보] 투표지 부족의 기원 — Meridian 투표율 과소예측 모델(MC-02)이 배부를 깎았다.',
+          complete: 'turnout',
+        });
+      return out;
+    },
+    findings: {
+      signer:
+        '가림막 뒤의 이름 — 남기협.\n시범사업단 기술심의관. 그러나 소속 뒤에 괄호가 있다.\n"(Meridian 파견)". 서명자는 안에 있으면서, 밖에서 왔다.\n\n(데이터 확보: CERT-9917 서명자)',
+      forgery:
+        '표승우. 정식 검수 명단 어디에도 없는 이름.\n그런 그가 cert-mirror-2 를 "무결성 PASS" 처리했다.\n게다가 미러가 생기기도 전에. 검수가 아니라 알리바이였다.\n\n(데이터 확보: 위조 검수 보고서)',
+      meridian:
+        '남기협도 표승우도, 급여는 한 곳에서 나온다.\nMeridian Civic — "결과 보증"을 상품으로 파는 회사.\n개표기도, 검수도, 그 회사의 손이 닿아 있었다.\n\n(데이터 확보: Meridian Civic 접점)',
+      turnout:
+        '첫 실을 다시 당긴다 — "투표지가 부족했다"는 그 항의.\n예측 58%, 실제 74%. 과소예측만큼 배부가 깎였다.\n그 예측 모델을 판 것도 — Meridian 이었다. 실수가 아니라 설계다.\n\n(데이터 확보: 투표지 부족의 기원)',
+    },
+    events: {
+      meridian: { flag: 'ch9MeridianDone', beats: DLG_CH9_MERIDIAN },
+      turnout: { flag: 'ch9ThreatDone', beats: DLG_CH9_THREAT },
+    },
+    board: {
+      nodes: [
+        { id: 'cert', k: '검수확인서', t: 'CERT-9917 — 미러 등록 승인', cls: 'item', x: 8, y: 12 },
+        { id: 'signer', k: '서명자', t: '남기협 (기술심의관)', cls: 'person', x: 10, y: 62 },
+        { id: 'forgery', k: '위조 검수', t: '표승우 — 무권한 검수 PASS', cls: 'item', x: 40, y: 8 },
+        { id: 'pilot', k: '시범사업단', t: '검수·심의 조직', cls: 'org', x: 40, y: 66 },
+        { id: 'meridian', k: '배후 법인', t: 'Meridian Civic', cls: 'org', x: 78, y: 32 },
+        { id: 'turnout', k: '배부 조작', t: '투표율 과소예측 → 투표지 부족', cls: 'item', x: 74, y: 74 },
+      ],
+      good: [
+        ['cert', 'signer'],
+        ['signer', 'pilot'],
+        ['cert', 'forgery'],
+        ['signer', 'meridian'],
+        ['forgery', 'meridian'],
+        ['meridian', 'turnout'],
+      ],
+      why: {
+        'cert-signer': 'cert_registry — CERT-9917 의 서명자가 남기협.',
+        'pilot-signer': 'pilot_staff — 남기협은 시범사업단 기술심의관(파견).',
+        'cert-forgery': 'mirror_timeline — CERT-9917 이 승인한 미러를, 표승우의 위조 검수가 뒷받침.',
+        'meridian-signer': 'meridian_contracts MC-03 — 남기협은 Meridian Civic 파견 인력.',
+        'forgery-meridian': 'meridian_contracts MC-03 — 표승우도 Meridian Civic 파견 검수 인력.',
+        'meridian-turnout': 'turnout_model — 투표지 부족은 Meridian 투표율 예측 모델(MC-02)의 과소예측 산물.',
+      },
+      deduce: `뒷문에는 "검수 통과"라는 도장이 찍혀 있었다.<br>그 도장을 <b class="c-amber">위조</b>한 손을 따라가면 —<br><br>
+· CERT-9917 을 서명한 <b>남기협</b>과 미러를 "검수"한 <b>표승우</b>는<br>
+· 둘 다 <b class="c-violet">Meridian Civic</b> 파견 인력이고<br>
+· 같은 회사의 투표율 과소예측 모델이 <b class="c-phos">투표지 부족</b>까지 만들었다.<br><br>
+개표기(Ch8) · 검수(Ch9) · 배부(Ch7 비트1) — 세 갈래가 한 회사로 모인다.<br>
+행정 실수처럼 보였던 첫 실이, 같은 몸통이었다.<br><br>
+회사의 이름은 나왔다. 남은 건 — 그것을 산 사람과, 설계한 사람.`,
+    },
+    greeting: [
+      'EVIDENCE MOUNT: /cases/09_cert_chain — 시범사업 인증·검수 기록 (읽기 전용 · 허구 데이터)',
+      '도구: query  (인증 기록이 포렌식 DB 로 적재됨 · 인자 없이 실행하면 스키마)',
+      '목표는 우측 MISSION 패널 · 막히면 hint.\n',
+    ],
+    openedFlag: 'ch9Opened',
+    opening: (flags) => dlgCh9Open((flags.ch8Choice as string) ?? null),
+    finale: DLG_CH9_FINALE,
+    caseSummary: {
+      target: '대상: 한서시 시범사업 인증·검수·계약 기록 · 정보공개·제출 사본 · 정식 수사 공조',
+      clues: [
+        { key: 'intake', label: '사건 브리핑' },
+        { key: 'signer', label: 'CERT-9917 서명자 남기협' },
+        { key: 'forgery', label: '위조 검수 (표승우)' },
+        { key: 'meridian', label: 'Meridian Civic 접점' },
+        { key: 'turnout', label: '투표지 부족의 기원' },
+      ],
+      hypothesis: {
+        locked:
+          '인증 기록은 DB 에 적재됐다. 인자 없이 query 로 스키마부터 — CERT-9917 의 서명자를 벗겨라.',
+        unlocked:
+          '위조 검수가 뒷문을 인증했고, 서명자·검수자는 둘 다 <b class="c-violet">Meridian Civic</b> 파견이다.<br>같은 회사의 모델이 <b class="c-phos">투표지 부족</b>까지 설계했다 — 증거 보드에서 사슬을 완성할 것.',
+      },
+      safety:
+        '본 사건의 선거·기관·지명·인물은 <b>전부 허구</b>이며, 실존 선거 제도·기관과 무관하다.<br>대상은 정보공개·제출로 확보된 <b>읽기 전용 사본</b>이며 query 는 SELECT 조회만 가능하다.',
+    },
+    ending: {
+      doneTitle: 'CHAPTER 9 완료 — The Chain of Certification',
+      summary: '인증 사슬 추적 완료 · 위조 검수 색출 · 배후 법인 특정 · 근거 연결 6건 완성',
+      choiceFlag: 'ch9Choice',
+      choices: {
+        indict: '인적 고리 기소 — 위조·파견 라인을 검찰에 넘겼다.',
+        follow: '법인 추적 — Meridian 계약 구조를 파고들었다.',
+        shield: '증인 방패 — 제보자·증인 보호를 최우선했다.',
+      },
+      nextTitle: 'CHAPTER 10 예고 — "조용한 압승"',
+      nextBody:
+        '"표를 훔치지 않는다. 오차 범위 안에서 이기게 만들 뿐."<br>Meridian 의 \'결과 보증\' 상품은 누가 샀는가 — 발주 비선(秘線).<br>그리고 그 모든 것을 설계한 개인. 시즌의 마지막 신호가<br>가장 조용한 승리의 방을 연다.',
       pendingNote: '· SEASON 2 — 다음 신호를 기다리는 중 ·',
     },
   },
