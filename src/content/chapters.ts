@@ -10,6 +10,8 @@ import { CLOSEDCIRCUIT_FS } from './filesystems/closedcircuit';
 import { CLOSEDCIRCUIT_CCTV } from './cctv/closedcircuit';
 import { BLACKSIGNAL_FS } from './filesystems/blacksignal';
 import { BLACKSIGNAL_PKG } from './pkg/blacksignal';
+import { TWINTALLY_FS } from './filesystems/twintally';
+import { TWINTALLY_DB } from './databases/twintally';
 import {
   DLG_PROLOGUE_FINALE,
   DLG_CH1_FINALE,
@@ -26,12 +28,16 @@ import {
   DLG_CH5_MEMO,
   DLG_CH6_FINALE,
   DLG_CH6_KANG,
+  DLG_CH7_NW,
+  DLG_CH7_THREAT,
+  DLG_CH7_FINALE,
   dlgCh1Open,
   dlgCh2Open,
   dlgCh3Open,
   dlgCh4Open,
   dlgCh5Open,
   dlgCh6Open,
+  dlgCh7Open,
 } from './dialogues';
 
 export const CHAPTERS: Record<number, ChapterDef> = {
@@ -1111,10 +1117,173 @@ export const CHAPTERS: Record<number, ChapterDef> = {
         press: '검증 보도 — 신뢰 기자의 손으로 세상에 냈다.',
         victims: '피해자 주체 — 그들이 공개를 결정했다.',
       },
-      nextTitle: '에필로그',
-      nextBody: '',
+      nextTitle: 'SEASON 2 — 새 신호',
+      nextBody:
+        '캠페인은 끝났다. 그러나 채널은 닫히지 않았다.<br>기차로 두 시간 — 한서시. 보궐선거의 개표 숫자가 이상하다.<br>서로 닿지 않는 개표구들이 <b class="c-violet">끝자리까지 같은 표수</b>를 냈다.',
+      nextNote: '· SEASON 2 시작 — TWIN TALLY ·',
       finalEnding: true,
-      pendingNote: '· BLACK SIGNAL — 캠페인 완결 · 새 수사는 메인 메뉴에서 ·',
+    },
+  },
+  7: {
+    id: 7,
+    code: 'CASE AR-2026-1016',
+    title: 'Chapter 7 — Twin Tally (시즌 2)',
+    root: '/cases/07_twin_tally',
+    fs: TWINTALLY_FS,
+    db: TWINTALLY_DB,
+    doneFlag: 'ch7Done',
+    objectives: [
+      { key: 'intake', label: '브리핑 읽기  (cat briefing.txt)' },
+      { key: 'complaint', label: '항의 묵살 정황 확정  (수기 대장 디코드·전산 대조)' },
+      { key: 'twins', label: '쌍둥이 개표구 특정  (공표치 집계 — query)' },
+      { key: 'recount', label: '수기 검산 대조  (hand_tally 와 공표치 JOIN)' },
+      { key: 'module', label: '미승인 모듈 특정  (감사 로그·매니페스트 대조)' },
+    ],
+    fileTriggers: { '07_twin_tally/briefing.txt': 'intake' },
+    hints: {
+      intake: [
+        '새 시즌의 수사도 브리핑에서 시작한다.',
+        'ls 로 파일을 확인하고 cat 으로 읽는다.',
+        'cat briefing.txt',
+      ],
+      complaint: [
+        '항의는 종이에 적혔다. 전산에 없을 뿐.',
+        'ledger 의 .b64 스캔을 base64 -d 로 풀고, 전산 내보내기와 대조하라.',
+        'base64 -d ledger/complaint_ledger.b64  →  cat ledger/complaint_sys_export.txt',
+      ],
+      twins: [
+        '14개 개표구 중, 같은 숫자 조합이 두 번 나온 곳이 있는가?',
+        '후보 3인 득표 튜플로 GROUP BY 하고 COUNT 로 세어 보라.',
+        'query SELECT cha_suwan, baek_dohyun, lim_garyeo, COUNT(*) AS dup FROM official_tally GROUP BY cha_suwan, baek_dohyun, lim_garyeo ORDER BY dup DESC',
+      ],
+      recount: [
+        '같은 개표구의 두 숫자를 한 화면에 놓아야 차이가 증거가 된다.',
+        'official_tally 와 hand_tally 를 precinct 로 JOIN 하라.',
+        'query SELECT o.precinct, o.baek_dohyun, h.baek_dohyun, o.lim_garyeo, h.lim_garyeo FROM official_tally o JOIN hand_tally h ON o.precinct = h.precinct',
+      ],
+      module: [
+        '기계가 어떤 부품으로 부팅됐는지는 감사 로그가 안다.',
+        '부팅 로그의 모듈 목록을 인증 매니페스트와 대조하라 — 서명 없는 로드가 있다.',
+        'cat audit/tallybridge_boot.log  →  cat audit/cert_manifest.txt',
+      ],
+    },
+    scan(txt, done) {
+      const out: { msg?: string; complete?: string }[] = [];
+      if (!done.complaint && (txt.match(/투표지 부족/g) ?? []).length >= 4 && /미부여/.test(txt))
+        out.push({
+          msg: '[단서 확보] 묵살된 항의 4건 — 수기 대장에는 있고, 전산에는 없다.',
+          complete: 'complaint',
+        });
+      const twice = (v: string) => new RegExp(`${v}[\\s\\S]+${v}`).test(txt);
+      if (
+        !done.twins &&
+        /15207/.test(txt) &&
+        /9744/.test(txt) &&
+        /11026/.test(txt) &&
+        (/COUNT\(|\bdup\b/i.test(txt) || (twice('15207') && twice('9744') && twice('11026')))
+      )
+        out.push({
+          msg: '[단서 확보] 쌍둥이 3쌍 — 제3·11, 5·9, 8·14 개표구의 후보별 득표수가 완전히 동일.',
+          complete: 'twins',
+        });
+      if (!done.recount && /14892/.test(txt) && /14678/.test(txt))
+        out.push({
+          msg: '[단서 확보] 수기 검산 대조 — 기호2 +214 · 기호3 −214, 총투표수는 그대로.',
+          complete: 'recount',
+        });
+      if (!done.module && /blst-0\.9\.4/.test(txt) && /ballast/.test(txt))
+        out.push({
+          msg: '[단서 확보] 미승인 모듈 blst-0.9.4 "ballast" — 서명 없음, 집계 후처리에 후킹.',
+          complete: 'module',
+        });
+      return out;
+    },
+    findings: {
+      complaint:
+        '네 번. 같은 말이 네 번 적혔다 — 투표지 부족.\n그리고 전산에는, 한 건도 없다.\n항의는 사라진 게 아니라, 기록되지 않은 것이다.\n\n(데이터 확보: 묵살된 항의 4건)',
+      twins:
+        '서로 닿지도 않는 동네 여섯 곳이, 세 쌍의 같은 숫자를 냈다.\n우연의 확률은 0에 수렴한다.\n이건 통계가 아니라 — 서명이다.\n\n(데이터 확보: 쌍둥이 개표구 3쌍)',
+      recount:
+        '정다인은 세 번 셌다고 했다. 수기 14,678 — 공표 14,892.\n기호3은 정확히 그만큼 줄었다. 합계는 그대로.\n표는 늘지 않았다. 옮겨졌다.\n\n(데이터 확보: 수기 검산 대조)',
+      module:
+        '여섯 개의 모듈에는 서명이 있다. 일곱 번째에는 없다.\nblst-0.9.4 — 스스로를 "ballast"라 부른다.\n평형수. 배를 기울지 않게 하는 물.\n무엇을 기울지 않게 했나 — 표를.\n\n(데이터 확보: 미승인 모듈 ballast)',
+    },
+    events: {
+      twins: { flag: 'ch7NwDone', beats: DLG_CH7_NW },
+      module: { flag: 'ch7ThreatDone', beats: DLG_CH7_THREAT },
+    },
+    board: {
+      nodes: [
+        { id: 'daein', k: '제보자', t: '정다인 — 제11개표구 개표 사무원', cls: 'person', x: 6, y: 10 },
+        { id: 'complaints', k: '묵살된 항의', t: "'투표지 부족' 4건 — 전산 부재", cls: 'item', x: 8, y: 56 },
+        { id: 'twins', k: '쌍둥이 표', t: '3·11 / 5·9 / 8·14 — 동일 득표', cls: 'item', x: 34, y: 8 },
+        { id: 'recount', k: '수기 대조', t: '기호2 +214 · 기호3 −214 (합계 보존)', cls: 'item', x: 36, y: 66 },
+        { id: 'tb', k: '시범 시스템', t: 'TALLYBRIDGE (Suncrest 납품)', cls: 'server', x: 64, y: 32 },
+        { id: 'blst', k: '미승인 모듈', t: 'blst-0.9.4 "ballast" — 서명 없음', cls: 'server', x: 82, y: 66 },
+      ],
+      good: [
+        ['daein', 'complaints'],
+        ['daein', 'recount'],
+        ['twins', 'tb'],
+        ['recount', 'tb'],
+        ['blst', 'tb'],
+        ['blst', 'twins'],
+      ],
+      why: {
+        'complaints-daein': '참관인 수기 대장 스캔 — 정다인이 보전한 4건이 전산 민원 내보내기에 부재.',
+        'daein-recount': '제11개표구 수기 검산표 — 정다인 작성, 공표치와 214표 차이.',
+        'tb-twins': '쌍둥이 3쌍 전부 TALLYBRIDGE 디지털 집계 산출 — 수기 개표에서는 나올 수 없는 패턴.',
+        'recount-tb': '수기와 공표치의 차이는 집계·전송 단계에서만 생긴다 — 그 단계가 TALLYBRIDGE.',
+        'blst-tb': '부팅 감사 로그 — 매니페스트에 없는 blst-0.9.4 가 집계 모듈에 후킹된 채 로드됨.',
+        'blst-twins': '득표율을 목표 분포로 "평형"시키는 반올림 쿼터 — 그 버릇이 쌍둥이를 찍어냈다.',
+      },
+      deduce: `기계는 표를 훔치지 않았다. <b>옮겼다</b>.<br><br>
+· 투표소의 항의 4건은 <b class="c-amber">기록에서 지워졌고</b><br>
+· 여섯 개표구는 <b class="c-phos">세 쌍의 같은 숫자</b>를 냈으며<br>
+· 수기 검산과 공표치의 차이는 정확히 <b>214표</b> — 합계는 그대로다.<br><br>
+그리고 집계 유닛 안에, 서명 없는 일곱 번째 모듈 —<br>
+<b class="c-violet">blst-0.9.4 "ballast"</b>.<br><br>
+옮기던 손버릇이 쌍둥이를 남겼다. 이제 이 모듈의 본체를 열어야 한다.`,
+    },
+    greeting: [
+      'EVIDENCE MOUNT: /cases/07_twin_tally — 공표 개표상황표 DB + 제보 스캔 (읽기 전용 · 허구 데이터)',
+      '도구: 터미널 + query  (공표치·수기 검산이 포렌식 DB 로 적재됨)',
+      '목표는 우측 MISSION 패널 · 막히면 hint.\n',
+    ],
+    openedFlag: 'ch7Opened',
+    opening: (flags) => dlgCh7Open((flags.ch6Release as string) ?? null),
+    finale: DLG_CH7_FINALE,
+    caseSummary: {
+      target: '대상: 한서시장 보궐선거(가상) 공표 개표상황표 + 제보 스캔 + 감사 로그 발췌 · 예비 검토',
+      clues: [
+        { key: 'intake', label: '사건 브리핑' },
+        { key: 'complaint', label: '묵살된 항의 4건' },
+        { key: 'twins', label: '쌍둥이 개표구 3쌍' },
+        { key: 'recount', label: '수기 검산 대조 (+214/−214)' },
+        { key: 'module', label: '미승인 모듈 ballast' },
+      ],
+      hypothesis: {
+        locked:
+          '공표치는 DB 에 적재됐다. 인자 없이 query 로 스키마부터 — 같은 숫자가 두 번 나오는 곳을 찾아라.',
+        unlocked:
+          '집계 단계에서 표가 <b class="c-phos">옮겨졌다</b> (합계 보존 · 쌍둥이 3쌍).<br>집계 유닛 안의 미승인 모듈 <b class="c-violet">ballast</b> 가 유력하다 — 증거 보드에서 연결을 완성할 것.',
+      },
+      safety:
+        '본 사건의 선거·기관·지명·인물은 <b>전부 허구</b>이며, 실존 선거 제도·기관과 무관하다.<br>분석 대상은 공표·제출·정보공개로 확보된 <b>읽기 전용 사본</b>뿐이다.',
+    },
+    ending: {
+      doneTitle: 'CHAPTER 7 완료 — Twin Tally',
+      summary: '예비 검토 완료 · 쌍둥이 3쌍 확정 · 미승인 모듈 특정 · 근거 연결 6건 완성',
+      choiceFlag: 'ch7Choice',
+      choices: {
+        report: '정식 수사의뢰 — 절차의 힘을 택했다.',
+        press: '검증 보도 — 여론의 방패를 세웠다.',
+        protect: '제보자 보호 — 사람을 먼저 지켰다.',
+      },
+      nextTitle: 'CHAPTER 8 예고 — "Ballast"',
+      nextBody:
+        '재검표 논쟁 속에, 문제의 집계 유닛 한 대가 봉인·압수된다.<br>펌웨어 포렌식 이미지가 도착한다 — 서명 없는 모듈의 본체.<br>목표 득표율 테이블, 반올림 쿼터, 그리고 패치가 흘러들어온 길 —<br><b class="c-violet">cert-mirror-2</b>.',
+      pendingNote: '· SEASON 2 — 다음 신호를 기다리는 중 ·',
     },
   },
 };

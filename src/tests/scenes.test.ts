@@ -25,11 +25,13 @@ describe('sceneForChapter — 챕터별 로케이션 매핑', () => {
     expect(sceneForChapter(0).id).toBe('apartment');
     expect(sceneForChapter(1).id).toBe('apartment');
   });
-  it('Ch2 는 부모님 집, Ch3 는 SOC, Ch4 이후는 승강장', () => {
+  it('Ch2 는 부모님 집, Ch3 는 SOC, Ch4~6 은 승강장, Ch7 이후는 한서 거점', () => {
     expect(sceneForChapter(2).id).toBe('parents');
     expect(sceneForChapter(3).id).toBe('soc');
     expect(sceneForChapter(4).id).toBe('station');
-    expect(sceneForChapter(9).id).toBe('station');
+    expect(sceneForChapter(6).id).toBe('station');
+    expect(sceneForChapter(7).id).toBe('hanseo');
+    expect(sceneForChapter(9).id).toBe('hanseo');
   });
 });
 

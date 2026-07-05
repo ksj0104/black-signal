@@ -14,6 +14,10 @@ import {
   DLG_HOME_PHOTO,
   DLG_HOME_TV,
   DLG_HOME_WINDOW,
+  DLG_HS_BOX,
+  DLG_HS_MAP,
+  DLG_HS_TV,
+  DLG_HS_WINDOW,
   DLG_SOC_COFFEE,
   DLG_SOC_GLASS,
   DLG_SOC_HANNA,
@@ -24,7 +28,7 @@ import {
   DLG_ST_VEND,
 } from './dialogues/scenes';
 
-export type SceneId = 'apartment' | 'parents' | 'soc' | 'station';
+export type SceneId = 'apartment' | 'parents' | 'soc' | 'station' | 'hanseo';
 
 /** 핫스팟 클릭/캡션이 게임 상태에 접근하는 좁은 창구 (표현 계층 전용) */
 export interface SceneApi {
@@ -264,11 +268,61 @@ const STATION: SceneDef = {
   ],
 };
 
+const HANSEO: SceneDef = {
+  id: 'hanseo',
+  name: '한서 임시 거점 — 오피스텔 사무실',
+  aria: '늦가을 밤, 한서시 오피스텔에 차린 임시 수사 거점',
+  clock: '11:29 PM',
+  caption: () => '제보자의 상자와 공표된 숫자들. 워크스테이션이 기다린다.',
+  hotspots: [
+    {
+      id: 'window',
+      label: '창문',
+      // 실측: 창 프레임이 x61%부터 우측 끝까지, 창턱이 y≈49%. desk 우측 경계(61%)와
+      // 정확히 맞닿는다. 배열 순서(클릭 우선순위)는 window/map < tv/desk < box:
+      // 작은 타깃일수록 배열 뒤에 둔다.
+      rect: { l: 61, t: 0, w: 39, h: 49 },
+      onClick: (a) => a.openDialogue(DLG_HS_WINDOW),
+    },
+    {
+      id: 'map',
+      label: '개표구 지도',
+      // 실측: 코르크판이 x7~38%, y4~40%. desk 와의 모서리 겹침(32~38%, 33~40%)은
+      // desk 가 배열상 이후라 desk 가 가져간다.
+      rect: { l: 7, t: 4, w: 31, h: 36 },
+      onClick: (a) => a.openDialogue(DLG_HS_MAP),
+    },
+    {
+      id: 'tv',
+      label: 'TV',
+      // 실측: CRT 본체 x8~25%, y40~69% (아래 서랍장 제외)
+      rect: { l: 8, t: 40, w: 17, h: 29 },
+      onClick: (a) => a.openDialogue(DLG_HS_TV),
+    },
+    {
+      id: 'desk',
+      label: '워크스테이션',
+      // 실측: 듀얼 모니터+데스크 상판 x32~61%, y33~65%
+      rect: { l: 32, t: 33, w: 29, h: 32 },
+      pulse: () => true,
+      onClick: (a) => a.setScreen('work'),
+    },
+    {
+      id: 'box',
+      label: '제보 상자',
+      // 실측: 열린 종이 상자 x60~84%, y67~92%
+      rect: { l: 60, t: 67, w: 24, h: 25 },
+      onClick: (a) => a.openDialogue(DLG_HS_BOX),
+    },
+  ],
+};
+
 export const SCENES: Record<SceneId, SceneDef> = {
   apartment: APARTMENT,
   parents: PARENTS,
   soc: SOC,
   station: STATION,
+  hanseo: HANSEO,
 };
 
 /** 챕터 → 로케이션. 새 챕터의 무대는 여기서만 매핑한다. */
@@ -276,5 +330,6 @@ export function sceneForChapter(chapter: number): SceneDef {
   if (chapter <= 1) return APARTMENT;
   if (chapter === 2) return PARENTS;
   if (chapter === 3) return SOC;
+  if (chapter >= 7) return HANSEO;
   return STATION;
 }

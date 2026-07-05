@@ -86,9 +86,9 @@ export function EndScreen() {
           </div>
         </div>
 
-        {e.finalEnding ? (
-          <FinalEnding />
-        ) : (
+        {e.finalEnding && <FinalEnding />}
+        {/* 최종장이라도 다음 시즌 챕터가 구현돼 있으면 에필로그 아래에 예고·시작 버튼을 노출 */}
+        {(!e.finalEnding || hasNext) && (
           <div className="endNext">
             <b>{e.nextTitle}</b>
             <p dangerouslySetInnerHTML={{ __html: e.nextBody }} />
